@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <title>FutureYou</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- PARTICLES -->
+<div id="particles"></div>
+
+<!-- SECTION 1: LANDING -->
+<section id="s-landing" class="section active">
+  <div class="hero-content">
+    <div class="logo">Future<span>You</span></div>
+    <h1>Meet yourself<br/>in 40 years.</h1>
+    <p class="tagline">Future you left a voicemail.<br/>You should hear it.</p>
+    <button class="btn-primary" onclick="goTo('s-survey')">Start Your Journey →</button>
+  </div>
+  <div class="stat-bar">Latvia pension: 56% today → 24% by 2070</div>
+</section>
+
+<!-- SECTION 2: SURVEY -->
+<section id="s-survey" class="section">
+  <div class="survey-wrap">
+    <div class="progress-dots">
+      <span class="dot active" id="dot-0"></span>
+      <span class="dot" id="dot-1"></span>
+      <span class="dot" id="dot-2"></span>
+    </div>
+    <div class="q-card active" id="q0">
+      <h2>What's your name?</h2>
+      <input type="text" id="input-name" placeholder="e.g. Moulik" class="text-input"/>
+      <button class="btn-primary" onclick="nextQ(0)">Continue →</button>
+    </div>
+    <div class="q-card" id="q1">
+      <h2>How old are you?</h2>
+      <div class="slider-val" id="age-display">25</div>
+      <input type="range" id="input-age" min="18" max="45" value="25" class="slider"
+        oninput="document.getElementById('age-display').textContent=this.value"/>
+      <button class="btn-primary" onclick="nextQ(1)">Continue →</button>
+    </div>
+    <div class="q-card" id="q2">
+      <h2>Monthly salary?</h2>
+      <div class="radio-group">
+        <label class="radio-opt"><input type="radio" name="salary" value="<800"/> Under €800</label>
+        <label class="radio-opt"><input type="radio" name="salary" value="800-1500"/> €800 – €1,500</label>
+        <label class="radio-opt"><input type="radio" name="salary" value="1500-3000" checked/> €1,500 – €3,000</label>
+        <label class="radio-opt"><input type="radio" name="salary" value="3000+"/> Over €3,000</label>
+      </div>
+      <h2 style="margin-top:20px">3rd pillar pension?</h2>
+      <div class="radio-group">
+        <label class="radio-opt"><input type="radio" name="pension" value="yes"/> Yes</label>
+        <label class="radio-opt"><input type="radio" name="pension" value="no" checked/> No</label>
+        <label class="radio-opt"><input type="radio" name="pension" value="unknown"/> What's that?</label>
+      </div>
+      <button class="btn-primary" onclick="submitSurvey()">Create My Future Self →</button>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 3: AVATAR CREATION -->
+<section id="s-avatar" class="section">
+  <div id="avatar-intro" style="display:flex;flex-direction:column;align-items:center;gap:24px;text-align:center">
+    <div class="avatar-placeholder">
+      <svg viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg" width="120">
+        <circle cx="50" cy="35" r="22" stroke="#1AD2A0" stroke-width="2.5"/>
+        <path d="M10 110 C10 80 90 80 90 110" stroke="#1AD2A0" stroke-width="2.5" fill="none"/>
+      </svg>
+    </div>
+    <h2>Time to meet<br/>future you.</h2>
+    <p class="sub">We'll create a 3D version of you aged 65.</p>
+    <button class="btn-primary" onclick="startAvaturn()">Create My Avatar →</button>
+  </div>
+  <div id="avatar-loading" style="display:none;flex-direction:column;align-items:center;gap:24px">
+    <div class="pulse-ring"></div>
+    <p class="sub">Crafting your future self at 65...</p>
+  </div>
+</section>
+
+<!-- AVATURN MODAL -->
+<div id="avaturn-modal" style="display:none;position:fixed;inset:0;z-index:1000;background:#04160F;">
+  <div id="avaturn-sdk-container" style="width:100%;height:100%;"></div>
+  <button onclick="closeAvaturn()"
+    style="position:absolute;top:16px;right:16px;background:#0A2A1E;border:1.5px solid #1AD2A0;
+    color:#1AD2A0;padding:8px 16px;border-radius:8px;font-size:16px;cursor:pointer;">✕ Close</button>
+</div>
+
+<!-- SECTION 4: TALKING FACE (THE MAIN SCREEN) -->
+<section id="s-talk" class="section">
+
+  <!-- The 3D face canvas — zoomed into face only -->
+  <div id="face-container">
+    <canvas id="face-canvas"></canvas>
+    <!-- Teal glow ring around face -->
+    <div class="face-ring" id="face-ring"></div>
+    <!-- Loading overlay while GLB downloads -->
+    <div id="face-loading-overlay" style="position:absolute;inset:0;border-radius:50%;background:#0A2A1E;display:flex;align-items:center;justify-content:center;">
+      <div class="pulse-ring" style="width:60px;height:60px;"></div>
+    </div>
+  </div>
+
+  <!-- Name + status below face -->
+  <div class="talk-identity">
+    <div class="talk-name" id="talk-name">Future You, age 65</div>
+    <div class="talk-status" id="talk-status">Tap the mic to start talking</div>
+  </div>
+
+  <!-- What future self is saying — appears as subtitle -->
+  <div class="speech-bubble" id="speech-bubble"></div>
+
+  <!-- Mic button — big, center bottom -->
+  <button class="mic-btn" id="mic-btn" onclick="toggleMic()">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+      <rect x="9" y="2" width="6" height="12" rx="3" fill="currentColor"/>
+      <path d="M5 10a7 7 0 0014 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+      <line x1="12" y1="19" x2="12" y2="22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </button>
+  <p class="mic-hint" id="mic-hint">Hold to speak</p>
+
+  <!-- Fallback text input for iOS (shown only if speech recognition unavailable) -->
+  <div id="text-fallback" style="display:none;width:100%;max-width:400px;gap:8px">
+    <div style="display:flex;gap:8px">
+      <input type="text" id="text-input" placeholder="Type your message..." class="text-input"
+        onkeydown="if(event.key==='Enter')sendTextMessage()"/>
+      <button class="btn-send" onclick="sendTextMessage()">→</button>
+    </div>
+  </div>
+
+  <!-- Skip to INDEXO after a few exchanges -->
+  <button class="btn-secondary" id="cta-btn" style="display:none" onclick="goTo('s-cta')">
+    Start Saving with INDEXO →
+  </button>
+
+</section>
+
+<!-- SECTION 5: CTA -->
+<section id="s-cta" class="section">
+  <div class="cta-wrap">
+    <div class="logo">Future<span>You</span></div>
+    <h2>"Your future self<br/>is counting on you."</h2>
+    <a href="https://indexo.lv" target="_blank" class="btn-primary btn-block">Start Saving with INDEXO →</a>
+    <button class="btn-secondary btn-block" onclick="shareApp()">Share FutureYou</button>
+    <p class="team-credit">Built by Team MAT · FinQuest 2026<br/>Moulik · Akshat · Cong</p>
+  </div>
+</section>
+
+<!-- Three.js from CDN -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script src="scenarios.js"></script>
+<script src="chat.js"></script>
+<script type="module" src="avatar.js"></script>
+<script type="module" src="voice.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
