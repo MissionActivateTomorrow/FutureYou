@@ -101,11 +101,40 @@ function animateIdle(delta) {
   avatarMesh.rotation.x = 0.008 * Math.sin(idleT * 0.38);
 }
 
+// ── LIP SYNC ANIMATION ────────────────────────────────────────────
+function animateLipSync(delta) {
+  const speaking   = !!window._futureSpeaking;
+  const lerpFactor = Math.min(1, 14 * delta);
+  const restFactor = Math.min(1,  3 * delta);
+
+  if (morphMesh && morphDict) {
+    const weights = speaking ? (PHONEME_WEIGHTS[currentPhoneme] || {}) : {};
+    for (const name of Object.keys(morphDict)) {
+      const target = weights[name] || 0;
+      const f = target > lerpedMorphs[name] ? lerpFactor : restFactor;
+      lerpedMorphs[name] += (target - lerpedMorphs[name]) * f;
+      morphMesh.morphTargetInfluences[morphDict[name]] = lerpedMorphs[name];
+    }
+  } else if (jawBone) {
+    if (speaking) {
+      const hz = 3.5 + Math.min((window._speakBoundaryTick || 0) * 0.08, 2);
+      sinePhase += delta * hz * Math.PI * 2;
+      const amp   = PHONEME_AMP[currentPhoneme] ?? 0.18;
+      const noise = 0.85 + 0.15 * Math.sin(sinePhase * 0.31);
+      jawAngle += (amp * noise * Math.abs(Math.sin(sinePhase)) - jawAngle) * lerpFactor;
+    } else {
+      jawAngle += (0 - jawAngle) * restFactor;
+    }
+    jawBone.rotation.x = -jawAngle;
+  }
+}
+
 // ── RENDER LOOP ────────────────────────────────────────────────────
 function animate() {
   requestAnimationFrame(animate);
   const delta = clock.getDelta();
   animateIdle(delta);
+  animateLipSync(delta);
   renderer.render(scene, camera);
 }
 
