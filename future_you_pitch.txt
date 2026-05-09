@@ -1,0 +1,31 @@
+Pensions are really important, but government-funded pensions are at a high risk, so this is the time to be awake and start investing in pensions voluntarily and secure our future from a very young age. We at futuretech pull in new pension investors and keep them by hyper-personalization. So let's try to understand this in detail— 
+Most people feel that retirement is too distant (70 percent). We want to change that entirely. We want to change how pension feels.
+
+We do this by introducing FutureYou — a feature that sits inside your favorite banking app that lets you have a real, one-on-one conversation with your future self. A 3D avatar of you, your own face, your own voice — showing you two possible scenarios. The first: if you don't invest — your future self standing in a grey, empty landscape. The second: if you do invest — the same you, golden sky, your own home, a car, a yacht.
+
+So our targeted user age group is young-18 to 30 years old, which have a bank account. We focus on the younger group, as the whole next generation can be changed forever.
+
+We want to draw people in and keep them being active
+so we draw people in with two hooks. The first is personal — you get to see yourself, talk to yourself, and watch your own future change in real time, based on what you do today. The second is financial — we educate people about benefits. 
+
+Then we want to keep people investing by sending personalised notifications from their future self, delivered when the salary hits their bank account, for example, "You are three months away from affording that car."
+
+We validated this in the spirit of coopetition, and 60 percent of people said they feel using this solution they can start easily, but also 60 percent said they would not like to pay for this.
+
+So FutureYou is free for users. Instead, we license it to a partner banking firm on a B2B basis — because every user we activate directly grows their assets under management. They earn. We earn. Users save, no friction. We would like to start pilot with INDEXO for free for the first year and then we start a licensing business model.
+Users dont have to fill any forms, they start instantly with a conversation interface. Onboarding has basic questions -  What are your goals in life? What would you like to do when you are 60? this starts the first layer of personalization. Over time, as more conversations happen, the model improves and gets even more personalized.
+
+
+
+
+Not just one time onboarding.
+
+
+
+
+
+Three distinct things to fix:
+
+Interactive 3D — drag to rotate the world, pinch/scroll to zoom. Absolutely adds to the experience — makes it feel like a living diorama you can explore.
+Avatar size — camera is too far back. Moving it in and scaling the figure up.
+App as daily companion — restructuring around a full-bleed 3D home screen. The savings comparison becomes a tiny ambient chip, not a feature. The core loop: open → see future self → hear their message → respond.

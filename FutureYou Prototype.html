@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FutureYou</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --teal:#12c9a6; --teal-dim:#0a8c75;
+  --text:#edf0f8; --text2:#7384a4; --text3:#323f58;
+  --red:#c04050; --amber:#c07840;
+  --font:'Plus Jakarta Sans',sans-serif; --ps:1;
+}
+body{
+  font-family:var(--font);
+  background:radial-gradient(ellipse 900px 650px at 50% 48%,#07101f 0%,#020408 100%);
+  width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+.phone-scale{transform:scale(var(--ps));transform-origin:center center;}
+.phone{
+  width:390px;height:844px;border-radius:54px;background:#040609;
+  box-shadow:inset 0 0 0 1.5px rgba(255,255,255,0.09),inset 0 0 0 3.5px #08090f,
+    0 70px 180px rgba(0,0,0,0.96),0 30px 70px rgba(0,0,0,0.7),0 0 0 0.5px #000;
+  position:relative;overflow:hidden;
+}
+.pill{
+  position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  width:126px;height:37px;background:#000;border-radius:20px;z-index:100;pointer-events:none;
+}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;}
+.btn{
+  width:100%;border:none;border-radius:16px;font-family:var(--font);font-size:15px;font-weight:700;
+  padding:15.5px 22px;cursor:pointer;letter-spacing:0.01em;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  transition:opacity 0.15s,transform 0.1s;
+}
+.btn:active{opacity:0.78;transform:scale(0.975);}
+.btn-primary{background:var(--teal);color:#04060d;}
+.status{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  padding:0 28px 8px;height:59px;flex-shrink:0;color:var(--text);
+}
+.status-time{font-size:15px;font-weight:700;letter-spacing:-0.01em;}
+.status-icons{display:flex;align-items:center;gap:6px;}
+.chat-list{
+  flex:1;overflow-y:auto;padding:14px 20px;
+  display:flex;flex-direction:column;gap:10px;scrollbar-width:none;
+}
+.chat-list::-webkit-scrollbar{display:none;}
+.bubble{max-width:78%;padding:11px 15px;border-radius:18px;font-size:13.5px;line-height:1.6;font-weight:400;}
+.bubble.them{
+  background:rgba(15,26,44,0.95);color:var(--text);
+  border:1px solid rgba(255,255,255,0.055);
+  align-self:flex-start;border-bottom-left-radius:4px;
+}
+.bubble.me{background:var(--teal);color:#04060d;align-self:flex-end;border-bottom-right-radius:4px;font-weight:500;}
+.input-row{
+  background:#0b1220;border-top:1px solid rgba(255,255,255,0.055);
+  padding:10px 14px;display:flex;gap:8px;align-items:flex-end;
+}
+.tinput{
+  flex:1;background:#0f1a2c;border:1.5px solid var(--text3);border-radius:13px;
+  padding:9px 13px;color:var(--text);font-family:var(--font);font-size:13.5px;
+  resize:none;outline:none;min-height:40px;max-height:90px;line-height:1.5;transition:border-color 0.2s;
+}
+.tinput::placeholder{color:var(--text3);}
+.tinput:focus{border-color:var(--teal-dim);}
+.send-btn{
+  width:40px;height:40px;border-radius:12px;background:var(--teal);border:none;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.send-btn:active{opacity:0.78;}
+.safe{height:34px;flex-shrink:0;}
+@keyframes hintFade{0%{opacity:0;}12%{opacity:1;}72%{opacity:1;}100%{opacity:0;}}
+.drag-hint{animation:hintFade 3.8s ease-out both;pointer-events:none;}
+</style>
+
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script>
+window.FY=(function(){
+  var PAL={
+    A:{skin:0xb08868,top:0x515166,bot:0x424252,hair:0x2a2018,shoe:0x222228},
+    B:{skin:0xb08060,top:0x28303e,bot:0x1c2535,hair:0x181820,shoe:0x0d0f18},
+    C:{skin:0xc09878,top:0x8a7050,bot:0x5a7848,hair:0x3a2820,shoe:0x3a2810},
+    D:{skin:0xc0a080,top:0xe8dece,bot:0xd0c8a8,hair:0x2a2015,shoe:0xc8a030}
+  };
+  function pm(c,e){return new THREE.MeshPhongMaterial({color:c,emissive:e||0,flatShading:true});}
+
+  function buildAvatar(id){
+    var P=PAL[id],g=new THREE.Group();
+    // Hair
+    var hm=new THREE.Mesh(new THREE.SphereGeometry(0.39,6,5,0,Math.PI*2,0,Math.PI*0.52),pm(P.hair));
+    hm.position.set(0,2.53,-0.04); g.add(hm);
+    // Head
+    var head=new THREE.Mesh(new THREE.IcosahedronGeometry(0.355,1),pm(P.skin));
+    head.position.set(0,2.38,0); g.add(head);
+    // Ears
+    [-1,1].forEach(function(s){
+      var e=new THREE.Mesh(new THREE.BoxGeometry(0.055,0.115,0.08),pm(P.skin));
+      e.position.set(s*0.395,2.38,0); g.add(e);
+    });
+    // Neck
+    var nk=new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.11,0.18,5),pm(P.skin));
+    nk.position.set(0,2.08,0); g.add(nk);
+    // Torso
+    var to=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.82,0.34),pm(P.top));
+    to.position.set(0,1.6,0); g.add(to);
+    // Hips
+    var hi=new THREE.Mesh(new THREE.BoxGeometry(0.68,0.28,0.34),pm(P.bot));
+    hi.position.set(0,1.13,0); g.add(hi);
+    // Arms
+    [-1,1].forEach(function(s){
+      var ua=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.09,0.48,5),pm(P.top));
+      ua.position.set(s*0.42,1.7,0); ua.rotation.z=s*(id==='D'?0.28:0.09); g.add(ua);
+      var fa=new THREE.Mesh(new THREE.CylinderGeometry(0.085,0.075,0.42,5),pm(P.skin));
+      fa.position.set(s*(id==='D'?0.52:0.44),1.41,0); g.add(fa);
+      var hand=new THREE.Mesh(new THREE.BoxGeometry(0.11,0.11,0.07),pm(P.skin));
+      hand.position.set(s*(id==='D'?0.52:0.44),1.15,0); g.add(hand);
+    });
+    // Legs
+    [-1,1].forEach(function(s){
+      var ul=new THREE.Mesh(new THREE.CylinderGeometry(0.135,0.115,0.54,5),pm(P.bot));
+      ul.position.set(s*0.17,0.79,0); g.add(ul);
+      var ll=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.085,0.48,5),pm(P.shoe));
+      ll.position.set(s*0.17,0.46,0); g.add(ll);
+      var ft=new THREE.Mesh(new THREE.BoxGeometry(0.13,0.09,0.26),pm(P.shoe));
+      ft.position.set(s*0.17,0.17,0.06); g.add(ft);
+    });
+    if(id==='D'){
+      var gm=pm(0x0f1018);
+      [-0.11,0.11].forEach(function(x){
+        var l=new THREE.Mesh(new THREE.BoxGeometry(0.21,0.07,0.025),gm);
+        l.position.set(x,2.42,0.35); g.add(l);
+      });
+      var br=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.03,0.025),gm);
+      br.position.set(0,2.42,0.35); g.add(br);
+    }
+    return g;
+  }
+
+  function buildEnv(group,id){
+    var gc={A:0x1a1a25,B:0x0d0d17,C:0x273820,D:0x8a6020}[id];
+    var gnd=new THREE.Mesh(new THREE.PlaneGeometry(34,34),pm(gc));
+    gnd.rotation.x=-Math.PI/2; gnd.position.y=0.12; group.add(gnd);
+    var sh=new THREE.Mesh(new THREE.CircleGeometry(0.88,10),
+      new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:0.32}));
+    sh.rotation.x=-Math.PI/2; sh.position.set(0,0.13,0); group.add(sh);
+
+    if(id==='A'){
+      [[-1.3,2.5,0.7],[0.5,1.8,0.6],[1.9,3.0,0.75],[-2.6,2.0,0.6],[2.9,2.4,0.65]].forEach(function(v){
+        var m=new THREE.Mesh(new THREE.BoxGeometry(v[2],v[1],0.3),pm(0x24243a));
+        m.position.set(v[0],v[1]/2-0.38,-4.5); group.add(m);
+      });
+      [[-1.3,0.9],[0.5,0.55],[1.9,1.3],[2.9,1.0],[-2.6,1.4],[1.9,2.2]].forEach(function(v){
+        var w=new THREE.Mesh(new THREE.BoxGeometry(0.13,0.09,0.01),pm(0x48485a,0x1a1a2c));
+        w.position.set(v[0],v[1]-0.38,-4.34); group.add(w);
+      });
+      var tr=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.08,1.1,5),pm(0x2a2018));
+      tr.position.set(2.2,0.24,-1.2); group.add(tr);
+      [[0.28,0.65,-0.2,0.65],[-0.22,0.55,0.12,-0.6],[0.12,0.7,0.08,0.42]].forEach(function(v){
+        var b=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.03,0.42,4),pm(0x2a2018));
+        b.position.set(2.2+v[0],0.55+v[1],-1.2+v[2]); b.rotation.z=v[3]; group.add(b);
+      });
+    } else if(id==='B'){
+      [[-3.2,4.5,0.7],[-1.9,3.5,0.75],[-0.5,5.5,0.8],[0.9,3.8,0.7],[2.4,4.8,0.75],[3.8,3.2,0.65]].forEach(function(v){
+        var m=new THREE.Mesh(new THREE.BoxGeometry(v[2],v[1],0.3),pm(0x0f1022));
+        m.position.set(v[0],v[1]/2-0.38,-5); group.add(m);
+        for(var i=0;i<4;i++){
+          var win=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.08,0.01),pm(0xffea80,0x886600));
+          win.position.set(v[0]+(Math.random()-.5)*0.4,v[1]*0.1+Math.random()*v[1]*0.7-0.38,-4.84);
+          group.add(win);
+        }
+      });
+      var lp=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.05,1.6,5),pm(0x1a1a28));
+      lp.position.set(-2.2,0.5,-1.5); group.add(lp);
+      var lb=new THREE.Mesh(new THREE.SphereGeometry(0.05,6,4),pm(0xfff0a0,0x886040));
+      lb.position.set(-2.12,1.28,-1.5); group.add(lb);
+    } else if(id==='C'){
+      var hb=new THREE.Mesh(new THREE.BoxGeometry(1.2,0.9,0.7),pm(0xc8b890));
+      hb.position.set(-2.6,0.13,-2.5); group.add(hb);
+      var hr=new THREE.Mesh(new THREE.ConeGeometry(0.93,0.62,4),pm(0x8a4020));
+      hr.position.set(-2.6,0.9,-2.5); hr.rotation.y=Math.PI/4; group.add(hr);
+      var hdoor=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.38,0.01),pm(0x5a3818));
+      hdoor.position.set(-2.6,-0.14,-1.86); group.add(hdoor);
+      var tt=new THREE.Mesh(new THREE.CylinderGeometry(0.065,0.095,0.88,5),pm(0x3a2010));
+      tt.position.set(2.3,0.1,-1.5); group.add(tt);
+      var tf=new THREE.Mesh(new THREE.IcosahedronGeometry(0.64,1),pm(0x3a7830));
+      tf.position.set(2.3,0.99,-1.5); group.add(tf);
+      var cb=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.28,0.4),pm(0x6080a0));
+      cb.position.set(-1.6,-0.1,-1.9); group.add(cb);
+      var ct=new THREE.Mesh(new THREE.BoxGeometry(0.54,0.22,0.37),pm(0x5070a0));
+      ct.position.set(-1.65,0.14,-1.9); group.add(ct);
+    } else if(id==='D'){
+      var oc=new THREE.Mesh(new THREE.PlaneGeometry(22,14),pm(0x1460a0));
+      oc.rotation.x=-Math.PI/2; oc.position.set(0,0.18,-4); group.add(oc);
+      var hull=new THREE.Mesh(new THREE.BoxGeometry(1.65,0.28,0.5),pm(0xf0ece0));
+      hull.position.set(-3.2,0.3,-5.5); group.add(hull);
+      var mast=new THREE.Mesh(new THREE.CylinderGeometry(0.025,0.035,1.5,4),pm(0xd0c8a0));
+      mast.position.set(-3.1,0.97,-5.5); group.add(mast);
+      var sail=new THREE.Mesh(new THREE.BoxGeometry(0.02,0.92,0.52),pm(0xfaf7ed));
+      sail.position.set(-3.1,0.82,-5.5); sail.rotation.y=Math.PI/7; group.add(sail);
+      var pt=new THREE.Mesh(new THREE.CylinderGeometry(0.055,0.085,1.55,6),pm(0x8a6030));
+      pt.position.set(2.5,0.42,-1.5); group.add(pt);
+      [0,72,144,216,288].forEach(function(deg){
+        var r=deg*Math.PI/180;
+        var f=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.68,0.04),pm(0x3a6828));
+        f.position.set(2.5+Math.sin(r)*0.38,1.48,-1.5+Math.cos(r)*0.28);
+        f.rotation.set(Math.cos(r)*0.55,0,Math.sin(r)*0.55);
+        group.add(f);
+      });
+      var upole=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.025,0.9,4),pm(0xe8d0a0));
+      upole.position.set(1.2,0.28,-1.2); group.add(upole);
+      var utop=new THREE.Mesh(new THREE.ConeGeometry(0.45,0.2,8,1,true),pm(0xc84828));
+      utop.position.set(1.2,0.8,-1.2); group.add(utop);
+    }
+  }
+
+  function buildScene(container,id){
+    var W=container.offsetWidth||390, H=container.offsetHeight||844;
+    var renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+    renderer.setSize(W,H); renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+    renderer.domElement.style.cssText='position:absolute;top:0;left:0;width:'+W+'px;height:'+H+'px;touch-action:none;cursor:grab;';
+    container.appendChild(renderer.domElement);
+
+    var scene=new THREE.Scene();
+    var baseZ=4.4;
+    var camera=new THREE.PerspectiveCamera(52,W/H,0.1,50);
+    camera.position.set(0,2.1,baseZ); camera.lookAt(0,1.8,0);
+
+    var world=new THREE.Group(); scene.add(world);
+
+    var ambI={A:0.45,B:0.32,C:0.72,D:0.9}[id];
+    scene.add(new THREE.AmbientLight(0xffffff,ambI));
+    var dirC={A:0x8090a8,B:0x606888,C:0xf0c060,D:0xfff0d8}[id];
+    var dir=new THREE.DirectionalLight(dirC,1.2); dir.position.set(2,5,3); scene.add(dir);
+    var fill=new THREE.DirectionalLight(0x405880,0.25); fill.position.set(-2,1,-1); scene.add(fill);
+
+    buildEnv(world,id);
+    var av=buildAvatar(id);
+    av.scale.set(1.28,1.28,1.28);
+    world.add(av);
+
+    var orb={rY:0,rX:0,tY:0,tX:0,camZ:baseZ,tZ:baseZ,drag:false,px:0,py:0,pDist:0,nT:0};
+    var el=renderer.domElement;
+
+    function onPD(e){
+      if(orb.nT>1) return;
+      orb.drag=true; orb.px=e.clientX; orb.py=e.clientY;
+      try{el.setPointerCapture(e.pointerId);}catch(x){}
+      el.style.cursor='grabbing';
+    }
+    function onPM(e){
+      if(!orb.drag) return;
+      orb.tY+=(e.clientX-orb.px)*0.009;
+      orb.tX=Math.max(-0.22,Math.min(0.16,orb.tX+(e.clientY-orb.py)*0.005));
+      orb.px=e.clientX; orb.py=e.clientY;
+    }
+    function onPU(){orb.drag=false; el.style.cursor='grab';}
+    function onWhl(e){
+      e.preventDefault();
+      orb.tZ=Math.max(2.2,Math.min(7.8,orb.tZ+e.deltaY*0.006));
+    }
+    function onTS(e){
+      orb.nT=e.touches.length;
+      if(e.touches.length===2){
+        e.preventDefault();
+        orb.pDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+      }
+    }
+    function onTM(e){
+      if(e.touches.length===2){
+        e.preventDefault();
+        var d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+        orb.tZ=Math.max(2.2,Math.min(7.8,orb.tZ-(d-orb.pDist)*0.022));
+        orb.pDist=d;
+      }
+    }
+    function onTE(e){orb.nT=e.touches.length;}
+
+    el.addEventListener('pointerdown',onPD);
+    el.addEventListener('pointermove',onPM);
+    el.addEventListener('pointerup',onPU);
+    el.addEventListener('pointercancel',onPU);
+    el.addEventListener('wheel',onWhl,{passive:false});
+    el.addEventListener('touchstart',onTS,{passive:false});
+    el.addEventListener('touchmove',onTM,{passive:false});
+    el.addEventListener('touchend',onTE);
+
+    var animId,t=0;
+    function tick(){
+      animId=requestAnimationFrame(tick); t+=0.007;
+      orb.rY+=(orb.tY-orb.rY)*0.11;
+      orb.rX+=(orb.tX-orb.rX)*0.11;
+      orb.camZ+=(orb.tZ-orb.camZ)*0.09;
+      world.rotation.y=orb.rY; world.rotation.x=orb.rX;
+      camera.position.z=orb.camZ; camera.lookAt(0,1.8,0);
+      if(!orb.drag){av.rotation.y=Math.sin(t*0.3)*0.04; av.position.y=Math.sin(t*0.5)*0.006;}
+      renderer.render(scene,camera);
+    }
+    tick();
+
+    return {
+      destroy:function(){
+        cancelAnimationFrame(animId);
+        el.removeEventListener('pointerdown',onPD);
+        el.removeEventListener('pointermove',onPM);
+        el.removeEventListener('pointerup',onPU);
+        el.removeEventListener('pointercancel',onPU);
+        el.removeEventListener('wheel',onWhl);
+        el.removeEventListener('touchstart',onTS);
+        el.removeEventListener('touchmove',onTM);
+        el.removeEventListener('touchend',onTE);
+        renderer.dispose();
+        try{container.removeChild(renderer.domElement);}catch(x){}
+      }
+    };
+  }
+  return {buildScene:buildScene};
+})();
+</script>
+
+<script type="text/babel">
+const {useState,useEffect,useRef}=React;
+
+const SCENARIOS={
+  A:{id:'A',label:'Bleak',sub:'Retired · Money is tight',
+     chip:{text:'Struggling',color:'#c04050'},
+     sky:'linear-gradient(180deg,#272838 0%,#1d1d2b 55%,#29231a 100%)',
+     quote:"I wish I had started earlier. Every month feels tight now. I can't travel, can't help my kids.",
+     replies:["Starting earlier was the only thing that could have changed this.","€50 a month at 26. That's all it would have taken.","The habit is what matters. The amount almost doesn't.","I think about it every single day."]},
+  B:{id:'B',label:'Still Working',sub:'No safety net · City life',
+     chip:{text:'No safety net',color:'#c07840'},
+     sky:'linear-gradient(180deg,#07070f 0%,#0e0e1e 55%,#17162a 100%)',
+     quote:"The city feels different when you can't afford to enjoy it. I'm still working at 67.",
+     replies:["The biggest cost wasn't money. It was freedom I never had.","Start now. Even a small amount. Future you will understand.","Nobody told me compound interest worked both ways."]},
+  C:{id:'C',label:'Content',sub:'Modest comfort · Peace of mind',
+     chip:{text:'On track',color:'#12c9a6'},
+     sky:'linear-gradient(180deg,#df7018 0%,#bf4e0e 36%,#791204 70%,#391504 100%)',
+     quote:"Starting with €50/month gave me my own home and peace of mind. It was simpler than I thought.",
+     replies:["Peace of mind is underrated. I sleep well every night.","The €50 felt like nothing at 26. Now it means everything.","Modest is more than enough, honestly."]},
+  D:{id:'D',label:'Thriving',sub:'Full freedom · Retired wealthy',
+     chip:{text:'Thriving',color:'#12c9a6'},
+     sky:'linear-gradient(180deg,#0c4788 0%,#1563a8 30%,#1778be 55%,#76a8d0 82%,#d2b558 100%)',
+     quote:"Beach house, the yacht, holidays whenever I want. I started at 26 with €100/month. Best decision.",
+     replies:["€100 a month at 26 — roughly one dinner. Best trade I ever made.","Time became mine. That's what money really buys.","Start earlier than you think you need to. Trust me."]}
+};
+const ORDER=['A','B','C','D'];
+
+/* ── Icons ── */
+const Logo=({size=28})=>(
+  <svg width={size} height={size} viewBox="0 0 40 40" fill="none">
+    <circle cx="20" cy="20" r="18.5" stroke="#12c9a6" strokeWidth="1" opacity="0.22"/>
+    <path d="M20 28L20 20L12.5 13" stroke="#12c9a6" strokeWidth="2.2" strokeLinecap="round" opacity="0.38"/>
+    <path d="M20 20L27.5 13"       stroke="#12c9a6" strokeWidth="2.4" strokeLinecap="round"/>
+    <circle cx="20"   cy="20" r="2.9" fill="#12c9a6"/>
+    <circle cx="20"   cy="28" r="1.7" fill="#12c9a6" opacity="0.32"/>
+    <circle cx="27.5" cy="13" r="2.1" fill="#12c9a6"/>
+    <circle cx="12.5" cy="13" r="1.5" fill="#12c9a6" opacity="0.28"/>
+  </svg>
+);
+const ChevR=()=><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>;
+const ChevL=()=><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3.5L5.5 8L10 12.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>;
+const SendIcon=()=><svg width="17" height="17" viewBox="0 0 17 17" fill="none"><path d="M15.5 1.5L8 9.5M15.5 1.5L11 15.5L8 9.5M15.5 1.5L1.5 7L8 9.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>;
+const Signal=()=><svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="8" width="2.8" height="4" rx="0.6"/><rect x="4.5" y="5.5" width="2.8" height="6.5" rx="0.6"/><rect x="9" y="3" width="2.8" height="9" rx="0.6"/><rect x="13.5" y="0" width="2.8" height="12" rx="0.6" opacity="0.28"/></svg>;
+const Wifi=()=><svg width="17" height="13" viewBox="0 0 17 13" fill="none"><circle cx="8.5" cy="11.5" r="1.5" fill="currentColor"/><path d="M5 8.5a5 5 0 0 1 7 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/><path d="M2 5.5a10 10 0 0 1 13 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>;
+const Battery=()=><svg width="26" height="13" viewBox="0 0 26 13" fill="currentColor"><rect x="0.75" y="0.75" width="21.5" height="11.5" rx="2.5" stroke="currentColor" strokeWidth="1.5" fill="none"/><rect x="22.5" y="3.5" width="2.2" height="6" rx="1" opacity="0.45"/><rect x="2" y="2.5" width="15" height="8" rx="1.5"/></svg>;
+const OrbitIcon=()=>(
+  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+    <circle cx="14" cy="14" r="12" stroke="rgba(255,255,255,0.3)" strokeWidth="1.2"/>
+    <circle cx="14" cy="14" r="3"  fill="rgba(255,255,255,0.55)"/>
+    <path d="M14 3 C8 3 3 8 3 14" stroke="rgba(255,255,255,0.55)" strokeWidth="1.4" strokeLinecap="round"/>
+    <path d="M3 14 L6 11M3 14 L6 17" stroke="rgba(255,255,255,0.55)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const StatusBar=({overlay=false})=>(
+  <div className="status" style={{color:overlay?'rgba(255,255,255,0.9)':'#edf0f8'}}>
+    <span className="status-time">9:41</span>
+    <div className="status-icons"><Signal/><Wifi/><Battery/></div>
+  </div>
+);
+
+/* ── Avatar 3D Scene ── */
+function AvatarScene({id}){
+  const ref=useRef(null);
+  useEffect(()=>{
+    const el=ref.current;
+    if(!el||!window.FY) return;
+    let scene;
+    const frame=requestAnimationFrame(()=>{
+      if(ref.current) scene=window.FY.buildScene(el,id);
+    });
+    return ()=>{
+      cancelAnimationFrame(frame);
+      if(scene) scene.destroy();
+    };
+  },[id]);
+  return <div ref={ref} style={{position:'absolute',inset:0}}/>;
+}
+
+/* ── INTRO SCREEN ── */
+function IntroScreen({onNext}){
+  return (
+    <div className="screen" style={{background:'#05070f',alignItems:'center'}}>
+      <StatusBar/>
+      <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'0 36px',gap:'30px'}}>
+        <Logo size={72}/>
+        <div style={{textAlign:'center'}}>
+          <div style={{fontSize:'10.5px',fontWeight:'700',letterSpacing:'0.22em',textTransform:'uppercase',color:'#12c9a6',marginBottom:'16px'}}>FutureYou</div>
+          <h1 style={{fontSize:'38px',fontWeight:'800',color:'#edf0f8',lineHeight:'1.13',letterSpacing:'-0.03em',marginBottom:'18px'}}>
+            Meet your<br/>future self.
+          </h1>
+          <p style={{fontSize:'15px',fontWeight:'400',color:'#7384a4',lineHeight:'1.7',maxWidth:'262px',margin:'0 auto'}}>
+            See yourself at 67 — shaped by the financial decisions you make today.
+          </p>
+        </div>
+        <div style={{width:'28px',height:'1.5px',background:'#12c9a6',opacity:0.32}}/>
+        <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'6px'}}>
+          <div style={{display:'flex',alignItems:'center',gap:'16px'}}>
+            {[['Interactive 3D world','#12c9a6'],['4 futures','#12c9a6']].map(([l,c])=>(
+              <div key={l} style={{display:'flex',alignItems:'center',gap:'6px'}}>
+                <svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill={c}/></svg>
+                <span style={{fontSize:'12px',fontWeight:'500',color:'#7384a4'}}>{l}</span>
+              </div>
+            ))}
+          </div>
+          <div style={{fontSize:'11px',color:'#1e2a40',fontWeight:'400'}}>Drag to rotate · Pinch or scroll to zoom</div>
+        </div>
+      </div>
+      <div style={{padding:'0 26px 50px',width:'100%',display:'flex',flexDirection:'column',gap:0}}>
+        <button className="btn btn-primary" onClick={onNext}>
+          See my future self <ChevR/>
+        </button>
+        <div style={{textAlign:'center',marginTop:'13px',fontSize:'11.5px',color:'#1e2a40'}}>
+          No account required · 2 minutes
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── HOME SCREEN ── */
+function HomeScreen({onChat}){
+  const [scId,setScId]=useState('C');
+  const [showHint,setShowHint]=useState(true);
+  const sc=SCENARIOS[scId];
+  const idx=ORDER.indexOf(scId);
+
+  useEffect(()=>{
+    const t=setTimeout(()=>setShowHint(false),4200);
+    return ()=>clearTimeout(t);
+  },[]);
+
+  return (
+    <div className="screen" style={{position:'relative',overflow:'hidden'}}>
+
+      {/* Sky background */}
+      <div style={{position:'absolute',inset:0,background:sc.sky}}/>
+
+      {/* 3D scene — keyed so it rebuilds on scenario change */}
+      <div style={{position:'absolute',inset:0}}>
+        <AvatarScene key={scId} id={scId}/>
+      </div>
+
+      {/* Top vignette for header legibility */}
+      <div style={{
+        position:'absolute',top:0,left:0,right:0,height:'200px',
+        background:'linear-gradient(rgba(0,0,0,0.58) 0%,rgba(0,0,0,0.18) 65%,transparent 100%)',
+        pointerEvents:'none',zIndex:2
+      }}/>
+
+      {/* Bottom vignette for card legibility */}
+      <div style={{
+        position:'absolute',bottom:0,left:0,right:0,height:'340px',
+        background:'linear-gradient(transparent 0%,rgba(4,6,9,0.82) 45%,rgba(4,6,9,0.97) 100%)',
+        pointerEvents:'none',zIndex:2
+      }}/>
+
+      {/* ── HEADER OVERLAY ── */}
+      <div style={{position:'absolute',top:0,left:0,right:0,zIndex:10}}>
+        <StatusBar overlay/>
+        <div style={{padding:'2px 22px 0',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+          <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
+            <Logo size={24}/>
+            <span style={{fontSize:'14px',fontWeight:'800',color:'rgba(255,255,255,0.9)',letterSpacing:'-0.01em'}}>FutureYou</span>
+          </div>
+          {/* Savings path chip — small, ambient */}
+          <div style={{
+            display:'flex',alignItems:'center',gap:'5px',
+            background:'rgba(0,0,0,0.42)',backdropFilter:'blur(10px)',
+            border:'1px solid rgba(255,255,255,0.1)',
+            borderRadius:'20px',padding:'4.5px 10px 4.5px 7px'
+          }}>
+            <div style={{width:6,height:6,borderRadius:3,background:sc.chip.color,flexShrink:0}}/>
+            <span style={{fontSize:'10.5px',fontWeight:'600',color:'rgba(255,255,255,0.72)',letterSpacing:'0.02em'}}>{sc.chip.text}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── ORBIT HINT (center, fades out) ── */}
+      {showHint && (
+        <div className="drag-hint" style={{
+          position:'absolute',top:'42%',left:'50%',transform:'translate(-50%,-50%)',
+          zIndex:5,display:'flex',flexDirection:'column',alignItems:'center',gap:'9px'
+        }}>
+          <OrbitIcon/>
+          <span style={{fontSize:'10.5px',fontWeight:'700',color:'rgba(255,255,255,0.45)',
+            letterSpacing:'0.14em',textTransform:'uppercase'}}>Drag · Pinch · Scroll</span>
+        </div>
+      )}
+
+      {/* ── BOTTOM CARD ── */}
+      <div style={{position:'absolute',bottom:0,left:0,right:0,zIndex:10,padding:'16px 22px 36px'}}>
+
+        {/* Scenario selector — very subtle */}
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'20px'}}>
+          <div style={{display:'flex',gap:'5px',alignItems:'center'}}>
+            {ORDER.map((id)=>(
+              <button key={id} onClick={()=>setScId(id)} style={{
+                height:5,
+                width:id===scId?22:5,
+                borderRadius:3,border:'none',cursor:'pointer',padding:0,
+                background:id===scId?sc.chip.color:'rgba(255,255,255,0.2)',
+                transition:'width 0.28s cubic-bezier(0.4,0,0.2,1),background 0.28s'
+              }}/>
+            ))}
+          </div>
+          <div style={{display:'flex',gap:'0'}}>
+            <button onClick={()=>setScId(ORDER[Math.max(0,idx-1)])} disabled={idx===0} style={{
+              background:'none',border:'none',cursor:idx===0?'default':'pointer',
+              color:idx===0?'rgba(255,255,255,0.15)':'rgba(255,255,255,0.5)',padding:'4px'
+            }}><ChevL/></button>
+            <button onClick={()=>setScId(ORDER[Math.min(ORDER.length-1,idx+1)])} disabled={idx===ORDER.length-1} style={{
+              background:'none',border:'none',cursor:idx===ORDER.length-1?'default':'pointer',
+              color:idx===ORDER.length-1?'rgba(255,255,255,0.15)':'rgba(255,255,255,0.5)',padding:'4px'
+            }}><ChevR/></button>
+          </div>
+        </div>
+
+        {/* Identity */}
+        <div style={{marginBottom:'14px'}}>
+          <div style={{fontSize:'9.5px',fontWeight:'700',letterSpacing:'0.16em',
+            textTransform:'uppercase',color:'rgba(255,255,255,0.35)',marginBottom:'5px'}}>
+            Future You · Age 67
+          </div>
+          <div style={{fontSize:'24px',fontWeight:'800',color:'#edf0f8',letterSpacing:'-0.025em',lineHeight:1.1}}>
+            {sc.label}
+            <span style={{fontSize:'13px',fontWeight:'400',color:'rgba(255,255,255,0.32)',marginLeft:'9px',letterSpacing:'0',fontStyle:'normal'}}>
+              {sc.sub}
+            </span>
+          </div>
+        </div>
+
+        {/* Quote */}
+        <div style={{
+          background:'rgba(6,10,20,0.72)',backdropFilter:'blur(18px)',
+          border:'1px solid rgba(255,255,255,0.065)',borderRadius:'18px',
+          padding:'14px 16px',marginBottom:'16px'
+        }}>
+          <p style={{fontSize:'13.5px',color:'rgba(237,240,248,0.82)',lineHeight:'1.65',fontStyle:'italic',fontWeight:'400'}}>
+            &#8220;{sc.quote}&#8221;
+          </p>
+        </div>
+
+        <button className="btn btn-primary" onClick={()=>onChat(sc)}>
+          Respond to Future You <ChevR/>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ── CHAT SCREEN ── */
+function ChatScreen({scenario,onBack}){
+  const [msgs,setMsgs]=useState([{from:'them',text:scenario.quote}]);
+  const [val,setVal]=useState('');
+  const listRef=useRef(null);
+
+  const PROMPTS={
+    A:"What would you say to the person making this future real today?",
+    B:"If you could change one financial decision, what would it be?",
+    C:"What does this version of your life make possible for you?",
+    D:"What would it mean to know this was your future?"
+  };
+
+  function send(){
+    var txt=val.trim();
+    if(!txt) return;
+    setVal('');
+    setMsgs(m=>[...m,{from:'me',text:txt}]);
+    setTimeout(()=>{
+      var r=scenario.replies[Math.floor(Math.random()*scenario.replies.length)];
+      setMsgs(m=>[...m,{from:'them',text:r}]);
+    },1100);
+  }
+
+  useEffect(()=>{
+    if(listRef.current) listRef.current.scrollTop=listRef.current.scrollHeight;
+  },[msgs]);
+
+  return (
+    <div className="screen" style={{background:'#05070f'}}>
+      <StatusBar/>
+      <div style={{
+        padding:'6px 18px 12px',display:'flex',alignItems:'center',gap:'12px',
+        borderBottom:'1px solid rgba(255,255,255,0.05)',flexShrink:0
+      }}>
+        <button onClick={onBack} style={{background:'none',border:'none',color:'#7384a4',cursor:'pointer',padding:'4px',display:'flex'}}>
+          <ChevL/>
+        </button>
+        <div style={{flex:1}}>
+          <div style={{fontSize:'15px',fontWeight:'700',color:'#edf0f8'}}>Future You · Age 67</div>
+          <div style={{fontSize:'11px',color:scenario.chip.color,fontWeight:'600',letterSpacing:'0.03em'}}>
+            {scenario.label} · {scenario.sub}
+          </div>
+        </div>
+        <div style={{
+          width:36,height:36,borderRadius:'50%',
+          border:'1.5px solid #12c9a6',background:'#0f1a2c',
+          display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0
+        }}>
+          <Logo size={22}/>
+        </div>
+      </div>
+
+      <div style={{
+        padding:'11px 20px 12px',background:'rgba(18,201,166,0.04)',
+        borderBottom:'1px solid rgba(18,201,166,0.08)',flexShrink:0
+      }}>
+        <div style={{fontSize:'9px',fontWeight:'700',letterSpacing:'0.15em',textTransform:'uppercase',color:'#12c9a6',marginBottom:'4px'}}>
+          Reflect
+        </div>
+        <div style={{fontSize:'12.5px',color:'#7384a4',lineHeight:'1.55',fontWeight:'400'}}>
+          {PROMPTS[scenario.id]}
+        </div>
+      </div>
+
+      <div className="chat-list" ref={listRef}>
+        {msgs.map((m,i)=>(
+          <div key={i} className={'bubble '+m.from}>{m.text}</div>
+        ))}
+      </div>
+
+      <div className="input-row">
+        <textarea
+          className="tinput"
+          placeholder="Write your reflection..."
+          value={val}
+          onChange={e=>setVal(e.target.value)}
+          onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}}}
+          rows={1}
+        />
+        <button className="send-btn" onClick={send}><SendIcon/></button>
+      </div>
+      <div className="safe"/>
+    </div>
+  );
+}
+
+/* ── ROOT ── */
+function App(){
+  const [screen,setScreen]=useState('intro');
+  const [activeSc,setActiveSc]=useState(null);
+  return (
+    <div style={{width:'100vw',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>
+      <div className="phone-scale">
+        <div className="phone">
+          <div className="pill"/>
+          {screen==='intro' && <IntroScreen onNext={()=>setScreen('home')}/>}
+          {screen==='home'  && <HomeScreen  onChat={sc=>{setActiveSc(sc);setScreen('chat');}}/>}
+          {screen==='chat'  && activeSc && <ChatScreen scenario={activeSc} onBack={()=>setScreen('home')}/>}
+        </div>
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(function(){
+  function scale(){
+    var w=window.innerWidth||document.documentElement.clientWidth;
+    var h=window.innerHeight||document.documentElement.clientHeight;
+    if(!w||!h) return;
+    var s=Math.min(1,(w-16)/390,(h-16)/844);
+    if(s>0) document.documentElement.style.setProperty('--ps',s);
+  }
+  window.addEventListener('load',scale);
+  window.addEventListener('resize',scale);
+  if(document.readyState!=='loading') scale();
+  else document.addEventListener('DOMContentLoaded',scale);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FutureYou — Avatar Screen Variants</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #05050d;
+    font-family: 'DM Sans', sans-serif;
+    color: white;
+    padding: 40px 20px 60px;
+  }
+  .page-title {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+  .page-title h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    color: white;
+  }
+  .page-title p {
+    font-size: 11px;
+    color: #444;
+    margin-top: 6px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .row {
+    display: flex;
+    gap: 28px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 50px;
+  }
+
+  .screen-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .screen-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #333;
+  }
+  .scenario-tag {
+    font-size: 10px;
+    color: #555;
+    text-align: center;
+    max-width: 220px;
+    line-height: 1.4;
+  }
+
+  .phone {
+    width: 240px;
+    height: 500px;
+    border-radius: 38px;
+    border: 1.5px solid #1e1e2e;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.7);
+  }
+  .phone::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 18px;
+    background: #05050d;
+    border-radius: 20px;
+    z-index: 100;
+  }
+
+  /* Toggle bar */
+  .toggle {
+    position: absolute;
+    top: 38px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 30px;
+    display: flex;
+    padding: 3px;
+    z-index: 50;
+    white-space: nowrap;
+  }
+  .toggle-btn {
+    padding: 5px 13px;
+    border-radius: 20px;
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #555;
+  }
+  .toggle-btn.active-bad { background: #3d1515; color: #ff8080; }
+  .toggle-btn.active-good { background: linear-gradient(135deg, #1a3d6e, #2563a8); color: #64c8ff; }
+
+  /* Speech bubble */
+  .bubble {
+    position: absolute;
+    bottom: 100px;
+    left: 14px;
+    right: 14px;
+    background: rgba(0,0,0,0.72);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 18px;
+    padding: 13px 15px;
+    z-index: 50;
+  }
+  .bubble-name {
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    font-weight: 700;
+  }
+  .bubble-name-bad { color: #ff8080; }
+  .bubble-name-good { color: #64c8ff; }
+  .bubble-text {
+    font-size: 10px;
+    color: rgba(255,255,255,0.8);
+    line-height: 1.55;
+  }
+
+  /* Mic button */
+  .mic-btn {
+    position: absolute;
+    bottom: 56px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+  .mic-bad { background: linear-gradient(135deg, #5a1a1a, #8b2020); box-shadow: 0 4px 16px rgba(139,32,32,0.5); }
+  .mic-good { background: linear-gradient(135deg, #1a3d6e, #2563a8); box-shadow: 0 4px 20px rgba(37,99,168,0.6); }
+
+  .mic-hint {
+    position: absolute;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    color: #333;
+    white-space: nowrap;
+    z-index: 50;
+    letter-spacing: 0.5px;
+  }
+
+  /* Section title */
+  .section-title {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .section-title h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #555;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  <h1>FutureYou — Avatar Screen Variants</h1>
+  <p>Future Self · Scenario Illustrations · No Emojis</p>
+</div>
+
+<!-- ROW 1: WITHOUT SAVINGS -->
+<div class="section-title"><h2>Without Savings Scenario</h2></div>
+<div class="row">
+
+  <!-- WITHOUT: Grey bleak landscape -->
+  <div class="screen-wrapper">
+    <div class="screen-label">Variant A · Bleak</div>
+    <div class="phone">
+      <!-- SKY: overcast grey -->
+      <svg width="240" height="500" viewBox="0 0 240 500" style="position:absolute;top:0;left:0;" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="skyBad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#1a1a1f"/>
+            <stop offset="60%" stop-color="#2a2a32"/>
+            <stop offset="100%" stop-color="#3a3540"/>
+          </linearGradient>
+          <linearGradient id="groundBad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#1a1818"/>
+            <stop offset="100%" stop-color="#0d0c0c"/>
+          </linearGradient>
+          <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#4a3f3f"/>
+            <stop offset="100%" stop-color="#2d2424"/>
+          </linearGradient>
+          <filter id="fog">
+            <feGaussianBlur stdDeviation="3"/>
+          </filter>
+        </defs>
+        <!-- Sky -->
+        <rect width="240" height="500" fill="url(#skyBad)"/>
+        <!-- Clouds -->
+        <ellipse cx="60" cy="80" rx="50" ry="18" fill="#2d2d38" opacity="0.8"/>
+        <ellipse cx="90" cy="70" rx="40" ry="14" fill="#32323e" opacity="0.9"/>
+        <ellipse cx="180" cy="100" rx="45" ry="16" fill="#2d2d38" opacity="0.7"/>
+        <ellipse cx="160" cy="92" rx="35" ry="12" fill="#32323e" opacity="0.8"/>
+        <!-- Fog layer -->
+        <rect x="0" y="270" width="240" height="40" fill="#2a2830" opacity="0.4" filter="url(#fog)"/>
+        <!-- Ground -->
+        <rect x="0" y="300" width="240" height="200" fill="url(#groundBad)"/>
+        <!-- Dead grass texture -->
+        <line x1="10" y1="300" x2="8" y2="288" stroke="#2a2020" stroke-width="1.5"/>
+        <line x1="20" y1="302" x2="22" y2="290" stroke="#2a2020" stroke-width="1"/>
+        <line x1="200" y1="301" x2="198" y2="289" stroke="#2a2020" stroke-width="1.5"/>
+        <line x1="215" y1="300" x2="217" y2="291" stroke="#2a2020" stroke-width="1"/>
+        <line x1="35" y1="303" x2="33" y2="293" stroke="#252020" stroke-width="1"/>
+        <line x1="170" y1="302" x2="172" y2="292" stroke="#252020" stroke-width="1.5"/>
+        <!-- Old apartment block far -->
+        <rect x="10" y="210" width="55" height="90" fill="#222228" rx="2"/>
+        <rect x="12" y="215" width="8" height="10" fill="#1a1a22" rx="1" opacity="0.8"/>
+        <rect x="24" y="215" width="8" height="10" fill="#2a2020" rx="1" opacity="0.6"/>
+        <rect x="36" y="215" width="8" height="10" fill="#1a1a22" rx="1" opacity="0.8"/>
+        <rect x="48" y="215" width="8" height="10" fill="#1a1a22" rx="1"/>
+        <rect x="12" y="232" width="8" height="10" fill="#1a1a22" rx="1"/>
+        <rect x="24" y="232" width="8" height="10" fill="#2a2020" rx="1"/>
+        <rect x="36" y="232" width="8" height="10" fill="#1a1a22" rx="1"/>
+        <rect x="48" y="232" width="8" height="10" fill="#2a1a1a" rx="1" opacity="0.5"/>
+        <rect x="12" y="250" width="8" height="10" fill="#1a1a22" rx="1"/>
+        <rect x="24" y="250" width="8" height="10" fill="#1a1a22" rx="1"/>
+        <rect x="36" y="250" width="8" height="10" fill="#2a2020" rx="1"/>
+        <rect x="48" y="250" width="8" height="10" fill="#1a1a22" rx="1"/>
+        <!-- Old car far right -->
+        <rect x="168" y="282" width="55" height="20" fill="#2a2028" rx="5"/>
+        <rect x="174" y="274" width="38" height="12" fill="#222026" rx="4"/>
+        <circle cx="178" cy="302" r="6" fill="#1a1820"/>
+        <circle cx="178" cy="302" r="3" fill="#0d0c0e"/>
+        <circle cx="214" cy="302" r="6" fill="#1a1820"/>
+        <circle cx="214" cy="302" r="3" fill="#0d0c0e"/>
+        <!-- Bare tree -->
+        <line x1="150" y1="300" x2="150" y2="240" stroke="#1e1818" stroke-width="3"/>
+        <line x1="150" y1="260" x2="132" y2="245" stroke="#1e1818" stroke-width="2"/>
+        <line x1="150" y1="255" x2="165" y2="242" stroke="#1e1818" stroke-width="2"/>
+        <line x1="150" y1="250" x2="140" y2="238" stroke="#1e1818" stroke-width="1.5"/>
+
+        <!-- AVATAR - large, centered, high up -->
+        <!-- Body -->
+        <g transform="translate(85, 130)">
+          <!-- Shadow -->
+          <ellipse cx="35" cy="168" rx="28" ry="6" fill="#000" opacity="0.3"/>
+          <!-- Legs -->
+          <rect x="22" y="130" width="12" height="35" fill="#2a2838" rx="4"/>
+          <rect x="36" y="130" width="12" height="35" fill="#252535" rx="4"/>
+          <!-- Shoes -->
+          <rect x="19" y="160" width="16" height="7" fill="#1a1820" rx="3"/>
+          <rect x="34" y="160" width="16" height="7" fill="#1a1820" rx="3"/>
+          <!-- Torso -->
+          <rect x="15" y="75" width="40" height="58" fill="url(#bodyGrad)" rx="8"/>
+          <!-- Arms -->
+          <rect x="2" y="80" width="13" height="40" fill="#3d3440" rx="6"/>
+          <rect x="55" y="80" width="13" height="40" fill="#3d3440" rx="6"/>
+          <!-- Hands -->
+          <ellipse cx="8" cy="122" rx="6" ry="7" fill="#c8a090"/>
+          <ellipse cx="62" cy="122" rx="6" ry="7" fill="#c8a090"/>
+          <!-- Neck -->
+          <rect x="27" y="62" width="16" height="16" fill="#c8a090" rx="4"/>
+          <!-- Head -->
+          <ellipse cx="35" cy="50" rx="22" ry="26" fill="#d4aa94"/>
+          <!-- Grey hair -->
+          <ellipse cx="35" cy="28" rx="22" ry="10" fill="#888" opacity="0.9"/>
+          <ellipse cx="15" cy="38" rx="6" ry="14" fill="#888" opacity="0.7"/>
+          <ellipse cx="55" cy="38" rx="6" ry="14" fill="#888" opacity="0.7"/>
+          <!-- Wrinkles -->
+          <path d="M 22 48 Q 25 46 28 48" stroke="#b89080" stroke-width="0.8" fill="none"/>
+          <path d="M 40 48 Q 43 46 46 48" stroke="#b89080" stroke-width="0.8" fill="none"/>
+          <path d="M 28 40 Q 35 38 42 40" stroke="#b89080" stroke-width="0.8" fill="none"/>
+          <!-- Eyes - sad/tired -->
+          <ellipse cx="26" cy="48" rx="4" ry="3" fill="#3a2820"/>
+          <ellipse cx="44" cy="48" rx="4" ry="3" fill="#3a2820"/>
+          <path d="M 22 45 Q 26 43 30 45" stroke="#8a7060" stroke-width="0.8" fill="none"/>
+          <path d="M 40 45 Q 44 43 48 45" stroke="#8a7060" stroke-width="0.8" fill="none"/>
+          <!-- Mouth - slight frown -->
+          <path d="M 28 62 Q 35 60 42 62" stroke="#b89080" stroke-width="1.2" fill="none"/>
+          <!-- Glasses -->
+          <rect x="21" y="45" width="10" height="7" fill="none" stroke="#555" stroke-width="1.2" rx="3"/>
+          <rect x="39" y="45" width="10" height="7" fill="none" stroke="#555" stroke-width="1.2" rx="3"/>
+          <line x1="31" y1="48" x2="39" y2="48" stroke="#555" stroke-width="1"/>
+        </g>
+
+        <!-- Subtle vignette overlay -->
+        <radialGradient id="vignetteBad" cx="50%" cy="50%" r="70%">
+          <stop offset="60%" stop-color="transparent"/>
+          <stop offset="100%" stop-color="#0a080a" stop-opacity="0.8"/>
+        </radialGradient>
+        <rect width="240" height="500" fill="url(#vignetteBad)"/>
+      </svg>
+
+      <div class="toggle">
+        <div class="toggle-btn active-bad">Without savings</div>
+        <div class="toggle-btn">With savings</div>
+      </div>
+
+      <div class="bubble">
+        <div class="bubble-name bubble-name-bad">Future You · Age 67</div>
+        <div class="bubble-text">"I wish I had started earlier. Every month feels tight now. I can't travel, can't help my kids."</div>
+      </div>
+      <div class="mic-btn mic-bad">
+        <svg width="14" height="18" viewBox="0 0 14 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="0" width="6" height="11" rx="3" fill="white" opacity="0.9"/>
+          <path d="M1 9c0 3.3 2.7 6 6 6s6-2.7 6-6" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <line x1="7" y1="15" x2="7" y2="18" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="mic-hint">Tap to respond</div>
+    </div>
+    <div class="scenario-tag">Grey overcast sky · Old apartment · Bare tree · Aged, tired avatar</div>
+  </div>
+
+  <!-- WITHOUT: Urban bleak -->
+  <div class="screen-wrapper">
+    <div class="screen-label">Variant B · Urban Bleak</div>
+    <div class="phone">
+      <svg width="240" height="500" viewBox="0 0 240 500" style="position:absolute;top:0;left:0;" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="skyUrban" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0f0f18"/>
+            <stop offset="100%" stop-color="#1e1e28"/>
+          </linearGradient>
+          <linearGradient id="groundUrban" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#18181e"/>
+            <stop offset="100%" stop-color="#0d0d12"/>
+          </linearGradient>
+          <linearGradient id="bodyGrad2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#3d3545"/>
+            <stop offset="100%" stop-color="#252030"/>
+          </linearGradient>
+        </defs>
+        <rect width="240" height="500" fill="url(#skyUrban)"/>
+        <!-- City buildings silhouette -->
+        <rect x="0" y="180" width="30" height="130" fill="#141420" rx="1"/>
+        <rect x="28" y="200" width="25" height="110" fill="#111118" rx="1"/>
+        <rect x="51" y="160" width="20" height="150" fill="#141420" rx="1"/>
+        <rect x="69" y="195" width="18" height="115" fill="#111118" rx="1"/>
+        <rect x="160" y="185" width="28" height="125" fill="#141420" rx="1"/>
+        <rect x="186" y="170" width="22" height="140" fill="#111118" rx="1"/>
+        <rect x="206" y="200" width="34" height="110" fill="#141420" rx="1"/>
+        <!-- Windows lit -->
+        <rect x="3" y="190" width="5" height="6" fill="#2a2515" rx="1" opacity="0.8"/>
+        <rect x="12" y="190" width="5" height="6" fill="#ffd700" rx="1" opacity="0.15"/>
+        <rect x="3" y="205" width="5" height="6" fill="#ffd700" rx="1" opacity="0.12"/>
+        <rect x="54" y="172" width="5" height="6" fill="#ffd700" rx="1" opacity="0.1"/>
+        <rect x="62" y="172" width="5" height="6" fill="#2a2515" rx="1" opacity="0.8"/>
+        <rect x="163" y="195" width="5" height="6" fill="#ffd700" rx="1" opacity="0.12"/>
+        <rect x="172" y="195" width="5" height="6" fill="#2a2515" rx="1" opacity="0.8"/>
+        <rect x="189" y="180" width="5" height="6" fill="#ffd700" rx="1" opacity="0.1"/>
+        <!-- Ground - concrete -->
+        <rect x="0" y="310" width="240" height="190" fill="url(#groundUrban)"/>
+        <!-- Road marking -->
+        <rect x="0" y="312" width="240" height="2" fill="#222230" opacity="0.5"/>
+        <!-- Old bench -->
+        <rect x="12" y="292" width="40" height="4" fill="#1e1c24" rx="2"/>
+        <rect x="14" y="296" width="4" height="14" fill="#1a1820" rx="1"/>
+        <rect x="44" y="296" width="4" height="14" fill="#1a1820" rx="1"/>
+
+        <!-- AVATAR - large, tired, urban -->
+        <g transform="translate(82, 125)">
+          <ellipse cx="37" cy="183" rx="28" ry="5" fill="#000" opacity="0.25"/>
+          <!-- Legs -->
+          <rect x="23" y="140" width="12" height="38" fill="#1e1c2a" rx="4"/>
+          <rect x="38" y="140" width="12" height="38" fill="#1a1828" rx="4"/>
+          <!-- Shoes -->
+          <rect x="20" y="173" width="17" height="7" fill="#15141e" rx="3"/>
+          <rect x="36" y="173" width="17" height="7" fill="#15141e" rx="3"/>
+          <!-- Torso - old coat -->
+          <rect x="14" y="80" width="46" height="63" fill="url(#bodyGrad2)" rx="8"/>
+          <!-- Coat collar -->
+          <path d="M 30 80 L 37 95 L 44 80" fill="#2a2535" opacity="0.8"/>
+          <!-- Arms - in pockets posture -->
+          <rect x="2" y="88" width="13" height="38" fill="#322e40" rx="6"/>
+          <rect x="59" y="88" width="13" height="38" fill="#322e40" rx="6"/>
+          <ellipse cx="8" cy="128" rx="6" ry="7" fill="#c09080"/>
+          <ellipse cx="65" cy="128" rx="6" ry="7" fill="#c09080"/>
+          <!-- Neck -->
+          <rect x="29" y="68" width="16" height="15" fill="#c09080" rx="4"/>
+          <!-- Head -->
+          <ellipse cx="37" cy="54" rx="22" ry="25" fill="#c8a088"/>
+          <!-- Grey/white hair -->
+          <ellipse cx="37" cy="33" rx="21" ry="9" fill="#9a9a9a" opacity="0.9"/>
+          <ellipse cx="17" cy="44" rx="5" ry="12" fill="#9a9a9a" opacity="0.7"/>
+          <ellipse cx="57" cy="44" rx="5" ry="12" fill="#9a9a9a" opacity="0.7"/>
+          <!-- Wrinkles forehead -->
+          <path d="M 24 44 Q 37 41 50 44" stroke="#aa8878" stroke-width="0.7" fill="none"/>
+          <path d="M 26 50 Q 37 48 48 50" stroke="#aa8878" stroke-width="0.7" fill="none"/>
+          <!-- Eyes tired -->
+          <ellipse cx="27" cy="55" rx="4" ry="3" fill="#2e1e18"/>
+          <ellipse cx="47" cy="55" rx="4" ry="3" fill="#2e1e18"/>
+          <!-- Under eye bags -->
+          <path d="M 23 58 Q 27 60 31 58" stroke="#aa8878" stroke-width="0.8" fill="none"/>
+          <path d="M 43 58 Q 47 60 51 58" stroke="#aa8878" stroke-width="0.8" fill="none"/>
+          <!-- Mouth neutral/sad -->
+          <path d="M 29 68 Q 37 67 45 68" stroke="#aa8878" stroke-width="1.2" fill="none"/>
+        </g>
+
+        <radialGradient id="vignetteUrban" cx="50%" cy="50%" r="70%">
+          <stop offset="50%" stop-color="transparent"/>
+          <stop offset="100%" stop-color="#05050d" stop-opacity="0.9"/>
+        </radialGradient>
+        <rect width="240" height="500" fill="url(#vignetteUrban)"/>
+      </svg>
+
+      <div class="toggle">
+        <div class="toggle-btn active-bad">Without savings</div>
+        <div class="toggle-btn">With savings</div>
+      </div>
+
+      <div class="bubble">
+        <div class="bubble-name bubble-name-bad">Future You · Age 67</div>
+        <div class="bubble-text">"The city feels different when you can't afford to enjoy it. I'm still working at 67."</div>
+      </div>
+      <div class="mic-btn mic-bad">
+        <svg width="14" height="18" viewBox="0 0 14 18" fill="none">
+          <rect x="4" y="0" width="6" height="11" rx="3" fill="white" opacity="0.9"/>
+          <path d="M1 9c0 3.3 2.7 6 6 6s6-2.7 6-6" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <line x1="7" y1="15" x2="7" y2="18" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="mic-hint">Tap to respond</div>
+    </div>
+    <div class="scenario-tag">Dark city skyline · No assets · Tired posture · Still working</div>
+  </div>
+
+</div>
+
+<!-- ROW 2: WITH SAVINGS -->
+<div class="section-title"><h2>With Savings Scenarios</h2></div>
+<div class="row">
+
+  <!-- WITH: Modest - house + car -->
+  <div class="screen-wrapper">
+    <div class="screen-label">Variant C · Modest</div>
+    <div class="phone">
+      <svg width="240" height="500" viewBox="0 0 240 500" style="position:absolute;top:0;left:0;" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="skyModest" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0d1a2e"/>
+            <stop offset="50%" stop-color="#1a3a5c"/>
+            <stop offset="85%" stop-color="#c87832"/>
+            <stop offset="100%" stop-color="#e09050"/>
+          </linearGradient>
+          <linearGradient id="groundModest" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#1a4a22"/>
+            <stop offset="100%" stop-color="#0d2810"/>
+          </linearGradient>
+          <linearGradient id="bodyModest" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#3a5a8a"/>
+            <stop offset="100%" stop-color="#2a4a7a"/>
+          </linearGradient>
+        </defs>
+        <rect width="240" height="500" fill="url(#skyModest)"/>
+        <!-- Sun low horizon -->
+        <circle cx="120" cy="295" r="22" fill="#ffa030" opacity="0.6"/>
+        <circle cx="120" cy="295" r="16" fill="#ffc040" opacity="0.5"/>
+        <!-- Light rays -->
+        <line x1="120" y1="270" x2="120" y2="255" stroke="#ffa030" stroke-width="1.5" opacity="0.3"/>
+        <line x1="135" y1="275" x2="145" y2="262" stroke="#ffa030" stroke-width="1" opacity="0.3"/>
+        <line x1="105" y1="275" x2="95" y2="262" stroke="#ffa030" stroke-width="1" opacity="0.3"/>
+        <!-- Ground -->
+        <rect x="0" y="305" width="240" height="195" fill="url(#groundModest)"/>
+        <!-- Path -->
+        <ellipse cx="120" cy="360" rx="20" ry="60" fill="#1e5a28" opacity="0.4"/>
+
+        <!-- House mid-left -->
+        <!-- House body -->
+        <rect x="8" y="245" width="68" height="65" fill="#c8906a" rx="3"/>
+        <!-- Roof -->
+        <polygon points="4,248 76,248 42,210" fill="#8b5a30"/>
+        <!-- Door -->
+        <rect x="32" y="280" width="16" height="30" fill="#7a4a20" rx="2"/>
+        <circle cx="44" cy="296" r="1.5" fill="#d4a060"/>
+        <!-- Windows -->
+        <rect x="12" y="254" width="14" height="14" fill="#a0c8e0" rx="2" opacity="0.7"/>
+        <rect x="50" y="254" width="14" height="14" fill="#a0c8e0" rx="2" opacity="0.7"/>
+        <!-- Window cross -->
+        <line x1="19" y1="254" x2="19" y2="268" stroke="#8ab0c8" stroke-width="0.8"/>
+        <line x1="12" y1="261" x2="26" y2="261" stroke="#8ab0c8" stroke-width="0.8"/>
+        <line x1="57" y1="254" x2="57" y2="268" stroke="#8ab0c8" stroke-width="0.8"/>
+        <line x1="50" y1="261" x2="64" y2="261" stroke="#8ab0c8" stroke-width="0.8"/>
+        <!-- Chimney smoke hint -->
+        <rect x="55" y="210" width="8" height="12" fill="#7a4a20" rx="1"/>
+
+        <!-- Car right side -->
+        <rect x="162" y="285" width="68" height="24" fill="#2d5a8a" rx="6"/>
+        <rect x="170" y="273" width="50" height="16" fill="#3a6a9a" rx="5"/>
+        <!-- Windshield -->
+        <rect x="173" y="275" width="22" height="12" fill="#8ab8d8" rx="3" opacity="0.7"/>
+        <rect x="197" y="276" width="20" height="10" fill="#7aa8c8" rx="3" opacity="0.6"/>
+        <!-- Wheels -->
+        <circle cx="178" cy="309" r="8" fill="#1a1a20"/>
+        <circle cx="178" cy="309" r="4" fill="#2a2a30"/>
+        <circle cx="218" cy="309" r="8" fill="#1a1a20"/>
+        <circle cx="218" cy="309" r="4" fill="#2a2a30"/>
+        <!-- Headlights -->
+        <rect x="162" y="290" width="6" height="8" fill="#ffe080" rx="1" opacity="0.6"/>
+
+        <!-- Tree healthy -->
+        <line x1="148" y1="310" x2="148" y2="240" stroke="#3a2a10" stroke-width="4"/>
+        <circle cx="148" cy="230" r="22" fill="#2a6a1a" opacity="0.9"/>
+        <circle cx="135" cy="240" r="16" fill="#256015" opacity="0.8"/>
+        <circle cx="161" cy="238" r="18" fill="#2a6a1a" opacity="0.85"/>
+
+        <!-- AVATAR - confident, relaxed -->
+        <g transform="translate(82, 118)">
+          <ellipse cx="37" cy="186" rx="28" ry="5" fill="#000" opacity="0.2"/>
+          <!-- Legs -->
+          <rect x="23" y="142" width="12" height="40" fill="#1e3a5a" rx="4"/>
+          <rect x="38" y="142" width="12" height="40" fill="#1a3456" rx="4"/>
+          <!-- Shoes -->
+          <rect x="20" y="177" width="17" height="8" fill="#14202e" rx="3"/>
+          <rect x="36" y="177" width="17" height="8" fill="#14202e" rx="3"/>
+          <!-- Torso - smart casual -->
+          <rect x="14" y="80" width="46" height="65" fill="url(#bodyModest)" rx="8"/>
+          <!-- Shirt collar -->
+          <path d="M 28 80 L 37 92 L 46 80" fill="#2a4a7a" opacity="0.6"/>
+          <!-- Arms relaxed at sides -->
+          <rect x="2" y="85" width="13" height="42" fill="#3a5a8a" rx="6"/>
+          <rect x="59" y="85" width="13" height="42" fill="#3a5a8a" rx="6"/>
+          <ellipse cx="8" cy="129" rx="6" ry="7" fill="#c8a080"/>
+          <ellipse cx="65" cy="129" rx="6" ry="7" fill="#c8a080"/>
+          <!-- Neck -->
+          <rect x="29" y="66" width="16" height="17" fill="#c8a080" rx="4"/>
+          <!-- Head -->
+          <ellipse cx="37" cy="52" rx="22" ry="26" fill="#d4aa84"/>
+          <!-- Silver hair distinguished -->
+          <ellipse cx="37" cy="30" rx="21" ry="10" fill="#b0b0b0" opacity="0.9"/>
+          <ellipse cx="17" cy="42" rx="5" ry="13" fill="#b0b0b0" opacity="0.8"/>
+          <ellipse cx="57" cy="42" rx="5" ry="13" fill="#b0b0b0" opacity="0.8"/>
+          <!-- Eyes - content, slight smile lines -->
+          <ellipse cx="27" cy="53" rx="4" ry="3.5" fill="#3a2818"/>
+          <ellipse cx="47" cy="53" rx="4" ry="3.5" fill="#3a2818"/>
+          <!-- Smile lines -->
+          <path d="M 23 56 Q 22 60 24 62" stroke="#b89070" stroke-width="0.8" fill="none"/>
+          <path d="M 51 56 Q 52 60 50 62" stroke="#b89070" stroke-width="0.8" fill="none"/>
+          <!-- Forehead lines subtle -->
+          <path d="M 26 42 Q 37 40 48 42" stroke="#b89070" stroke-width="0.6" fill="none"/>
+          <!-- Smile -->
+          <path d="M 29 65 Q 37 70 45 65" stroke="#c09070" stroke-width="1.5" fill="none"/>
+          <!-- Glasses -->
+          <rect x="21" y="50" width="11" height="8" fill="none" stroke="#8a6a50" stroke-width="1.2" rx="3"/>
+          <rect x="40" y="50" width="11" height="8" fill="none" stroke="#8a6a50" stroke-width="1.2" rx="3"/>
+          <line x1="32" y1="54" x2="40" y2="54" stroke="#8a6a50" stroke-width="1"/>
+        </g>
+
+        <radialGradient id="vignetteModest" cx="50%" cy="50%" r="70%">
+          <stop offset="55%" stop-color="transparent"/>
+          <stop offset="100%" stop-color="#05050d" stop-opacity="0.85"/>
+        </radialGradient>
+        <rect width="240" height="500" fill="url(#vignetteModest)"/>
+      </svg>
+
+      <div class="toggle">
+        <div class="toggle-btn">Without savings</div>
+        <div class="toggle-btn active-good">With savings</div>
+      </div>
+
+      <div class="bubble">
+        <div class="bubble-name bubble-name-good">Future You · Age 67</div>
+        <div class="bubble-text">"Starting with €50/month gave me my own home and peace of mind. It was simpler than I thought."</div>
+      </div>
+      <div class="mic-btn mic-good">
+        <svg width="14" height="18" viewBox="0 0 14 18" fill="none">
+          <rect x="4" y="0" width="6" height="11" rx="3" fill="white" opacity="0.9"/>
+          <path d="M1 9c0 3.3 2.7 6 6 6s6-2.7 6-6" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <line x1="7" y1="15" x2="7" y2="18" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="mic-hint">Tap to respond</div>
+    </div>
+    <div class="scenario-tag">Golden sunset · Modest house + car · Healthy tree · Content avatar</div>
+  </div>
+
+  <!-- WITH: Wealthy - beach + yacht -->
+  <div class="screen-wrapper">
+    <div class="screen-label">Variant D · Wealthy</div>
+    <div class="phone">
+      <svg width="240" height="500" viewBox="0 0 240 500" style="position:absolute;top:0;left:0;" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="skyWealthy" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0a1830"/>
+            <stop offset="40%" stop-color="#1a3d6e"/>
+            <stop offset="75%" stop-color="#e07030"/>
+            <stop offset="100%" stop-color="#f0a050"/>
+          </linearGradient>
+          <linearGradient id="ocean" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#1a4a7a"/>
+            <stop offset="100%" stop-color="#0d2840"/>
+          </linearGradient>
+          <linearGradient id="beach" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#d4b870"/>
+            <stop offset="100%" stop-color="#c0a050"/>
+          </linearGradient>
+          <linearGradient id="bodyWealthy" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#e0e8f0"/>
+            <stop offset="100%" stop-color="#c8d8e8"/>
+          </linearGradient>
+        </defs>
+        <!-- Sky -->
+        <rect width="240" height="500" fill="url(#skyWealthy)"/>
+
+        <!-- Ocean -->
+        <rect x="0" y="255" width="240" height="70" fill="url(#ocean)"/>
+        <!-- Ocean shimmer -->
+        <line x1="20" y1="265" x2="60" y2="265" stroke="#3a6a9a" stroke-width="1" opacity="0.5"/>
+        <line x1="100" y1="270" x2="150" y2="270" stroke="#3a6a9a" stroke-width="1" opacity="0.4"/>
+        <line x1="180" y1="263" x2="230" y2="263" stroke="#3a6a9a" stroke-width="1" opacity="0.5"/>
+        <line x1="40" y1="278" x2="90" y2="278" stroke="#3a6a9a" stroke-width="0.8" opacity="0.3"/>
+
+        <!-- Beach -->
+        <rect x="0" y="318" width="240" height="182" fill="url(#beach)"/>
+        <!-- Beach texture -->
+        <ellipse cx="50" cy="340" rx="30" ry="4" fill="#c8a848" opacity="0.3"/>
+        <ellipse cx="180" cy="355" rx="25" ry="3" fill="#c8a848" opacity="0.2"/>
+
+        <!-- Yacht on ocean -->
+        <!-- Hull -->
+        <ellipse cx="185" cy="275" rx="38" ry="10" fill="#f0f0f8"/>
+        <rect x="148" y="265" width="74" height="12" fill="#e8e8f0" rx="3"/>
+        <!-- Deck -->
+        <rect x="155" y="258" width="58" height="8" fill="#f8f8ff" rx="2"/>
+        <!-- Mast -->
+        <line x1="178" y1="220" x2="178" y2="260" stroke="#d0d0d8" stroke-width="2"/>
+        <!-- Sail -->
+        <polygon points="178,222 178,258 210,258" fill="white" opacity="0.9"/>
+        <polygon points="178,228 178,256 155,256" fill="#f0f0f8" opacity="0.8"/>
+        <!-- Flag -->
+        <rect x="178" y="218" width="10" height="6" fill="#3a6aaa" opacity="0.8" rx="1"/>
+
+        <!-- Jet in sky -->
+        <!-- Fuselage -->
+        <ellipse cx="65" cy="130" rx="30" ry="6" fill="#e8e8f0"/>
+        <!-- Wings -->
+        <polygon points="50,130 80,130 72,142 44,142" fill="#d8d8e8"/>
+        <polygon points="50,130 80,130 58,118 36,118" fill="#d8d8e8"/>
+        <!-- Tail -->
+        <polygon points="95,128 95,134 110,128" fill="#d0d0e0"/>
+        <polygon points="95,126 95,130 103,122" fill="#d0d0e0"/>
+        <!-- Engines -->
+        <ellipse cx="56" cy="140" rx="8" ry="3" fill="#c8c8d8"/>
+        <ellipse cx="72" cy="140" rx="8" ry="3" fill="#c8c8d8"/>
+        <!-- Contrail -->
+        <line x1="35" y1="130" x2="0" y2="125" stroke="white" stroke-width="1.5" opacity="0.2"/>
+
+        <!-- Luxury beach house -->
+        <!-- Main structure -->
+        <rect x="0" y="250" width="85" height="80" fill="#f5f0e8" rx="3"/>
+        <!-- Flat modern roof -->
+        <rect x="-2" y="245" width="89" height="8" fill="#e8e0d0" rx="2"/>
+        <!-- Large windows -->
+        <rect x="6" y="260" width="28" height="22" fill="#a0c8e0" rx="2" opacity="0.75"/>
+        <rect x="40" y="260" width="28" height="22" fill="#a0c8e0" rx="2" opacity="0.75"/>
+        <!-- Door -->
+        <rect x="30" y="295" width="20" height="35" fill="#8ab0c8" rx="2" opacity="0.8"/>
+        <!-- Terrace railing -->
+        <rect x="0" y="290" width="85" height="3" fill="#d8d0c0"/>
+        <line x1="10" y1="290" x2="10" y2="300" stroke="#d8d0c0" stroke-width="1.5"/>
+        <line x1="22" y1="290" x2="22" y2="300" stroke="#d8d0c0" stroke-width="1.5"/>
+        <!-- Pool hint -->
+        <rect x="6" y="303" width="20" height="12" fill="#4a9abf" rx="2" opacity="0.6"/>
+
+        <!-- Palm trees -->
+        <!-- Palm 1 -->
+        <line x1="165" y1="325" x2="160" y2="270" stroke="#5a3a10" stroke-width="4"/>
+        <ellipse cx="155" cy="265" rx="18" ry="8" fill="#2a6a1a" opacity="0.9" transform="rotate(-20 155 265)"/>
+        <ellipse cx="168" cy="260" rx="15" ry="6" fill="#256015" opacity="0.85" transform="rotate(10 168 260)"/>
+        <ellipse cx="145" cy="268" rx="14" ry="5" fill="#2a6a1a" opacity="0.8" transform="rotate(-35 145 268)"/>
+        <!-- Palm 2 -->
+        <line x1="210" y1="325" x2="215" y2="278" stroke="#5a3a10" stroke-width="3.5"/>
+        <ellipse cx="220" cy="273" rx="16" ry="7" fill="#2a6a1a" opacity="0.85" transform="rotate(15 220 273)"/>
+        <ellipse cx="208" cy="270" rx="13" ry="5" fill="#256015" opacity="0.8" transform="rotate(-15 208 270)"/>
+
+        <!-- Tesla/luxury car on beach -->
+        <rect x="90" y="298" width="70" height="22" fill="#c8d8e8" rx="8"/>
+        <rect x="98" y="287" width="52" height="14" fill="#d8e8f0" rx="6"/>
+        <!-- Glass roof -->
+        <rect x="101" y="289" width="46" height="10" fill="#a8c8e0" rx="4" opacity="0.7"/>
+        <!-- Wheels -->
+        <circle cx="102" cy="320" r="8" fill="#1e2028"/>
+        <circle cx="102" cy="320" r="4" fill="#2a2a34"/>
+        <circle cx="148" cy="320" r="8" fill="#1e2028"/>
+        <circle cx="148" cy="320" r="4" fill="#2a2a34"/>
+        <!-- Lights -->
+        <rect x="90" y="303" width="8" height="6" fill="#ffe8a0" rx="1" opacity="0.5"/>
+
+        <!-- AVATAR - happy, confident, white linen -->
+        <g transform="translate(82, 115)">
+          <ellipse cx="37" cy="210" rx="28" ry="5" fill="#000" opacity="0.15"/>
+          <!-- Legs - linen trousers -->
+          <rect x="23" y="162" width="12" height="44" fill="#e8e0d0" rx="4"/>
+          <rect x="38" y="162" width="12" height="44" fill="#e0d8c8" rx="4"/>
+          <!-- Sandals -->
+          <rect x="19" y="201" width="18" height="7" fill="#c8a060" rx="3"/>
+          <rect x="36" y="201" width="18" height="7" fill="#c8a060" rx="3"/>
+          <!-- Straps -->
+          <line x1="22" y1="201" x2="22" y2="205" stroke="#a08040" stroke-width="1.5"/>
+          <line x1="28" y1="201" x2="28" y2="205" stroke="#a08040" stroke-width="1.5"/>
+          <line x1="40" y1="201" x2="40" y2="205" stroke="#a08040" stroke-width="1.5"/>
+          <line x1="46" y1="201" x2="46" y2="205" stroke="#a08040" stroke-width="1.5"/>
+          <!-- Torso - white linen shirt -->
+          <rect x="14" y="95" width="46" height="70" fill="url(#bodyWealthy)" rx="8"/>
+          <!-- Shirt details -->
+          <line x1="37" y1="95" x2="37" y2="165" stroke="#d8e0e8" stroke-width="0.8"/>
+          <!-- Arms open/relaxed -->
+          <rect x="1" y="100" width="13" height="46" fill="#e0e8f0" rx="6"/>
+          <rect x="60" y="100" width="13" height="46" fill="#e0e8f0" rx="6"/>
+          <ellipse cx="7" cy="149" rx="6" ry="8" fill="#d4a880"/>
+          <ellipse cx="67" cy="149" rx="6" ry="8" fill="#d4a880"/>
+          <!-- Neck tanned -->
+          <rect x="29" y="80" width="16" height="18" fill="#d4a880" rx="4"/>
+          <!-- Head -->
+          <ellipse cx="37" cy="62" rx="24" ry="27" fill="#d8b090"/>
+          <!-- White/silver hair, well kept -->
+          <ellipse cx="37" cy="38" rx="23" ry="11" fill="#d0d0d0" opacity="0.95"/>
+          <ellipse cx="15" cy="52" rx="6" ry="14" fill="#d0d0d0" opacity="0.85"/>
+          <ellipse cx="59" cy="52" rx="6" ry="14" fill="#d0d0d0" opacity="0.85"/>
+          <!-- Tan skin -->
+          <!-- Eyes - happy, crinkled -->
+          <ellipse cx="27" cy="63" rx="4.5" ry="3.5" fill="#3a2010"/>
+          <ellipse cx="47" cy="63" rx="4.5" ry="3.5" fill="#3a2010"/>
+          <!-- Happy eye crinkles -->
+          <path d="M 22 60 Q 20 57 22 55" stroke="#b89060" stroke-width="0.8" fill="none"/>
+          <path d="M 52 60 Q 54 57 52 55" stroke="#b89060" stroke-width="0.8" fill="none"/>
+          <path d="M 22 66 Q 20 70 23 72" stroke="#b89060" stroke-width="0.8" fill="none"/>
+          <path d="M 52 66 Q 54 70 51 72" stroke="#b89060" stroke-width="0.8" fill="none"/>
+          <!-- Big smile -->
+          <path d="M 27 78 Q 37 88 47 78" stroke="#c09060" stroke-width="1.8" fill="none"/>
+          <!-- Sunglasses -->
+          <rect x="20" y="60" width="13" height="8" fill="#1a1a20" rx="3" opacity="0.85"/>
+          <rect x="41" y="60" width="13" height="8" fill="#1a1a20" rx="3" opacity="0.85"/>
+          <line x1="33" y1="64" x2="41" y2="64" stroke="#1a1a20" stroke-width="1.2"/>
+          <line x1="15" y1="63" x2="20" y2="63" stroke="#8a8a90" stroke-width="1"/>
+          <line x1="54" y1="63" x2="59" y2="63" stroke="#8a8a90" stroke-width="1"/>
+        </g>
+
+        <radialGradient id="vignetteWealthy" cx="50%" cy="50%" r="70%">
+          <stop offset="50%" stop-color="transparent"/>
+          <stop offset="100%" stop-color="#05050d" stop-opacity="0.7"/>
+        </radialGradient>
+        <rect width="240" height="500" fill="url(#vignetteWealthy)"/>
+      </svg>
+
+      <div class="toggle">
+        <div class="toggle-btn">Without savings</div>
+        <div class="toggle-btn active-good">With savings</div>
+      </div>
+
+      <div class="bubble">
+        <div class="bubble-name bubble-name-good">Future You · Age 67</div>
+        <div class="bubble-text">"Beach house, the yacht, holidays whenever I want. I started at 26 with €100/month. Best decision."</div>
+      </div>
+      <div class="mic-btn mic-good">
+        <svg width="14" height="18" viewBox="0 0 14 18" fill="none">
+          <rect x="4" y="0" width="6" height="11" rx="3" fill="white" opacity="0.9"/>
+          <path d="M1 9c0 3.3 2.7 6 6 6s6-2.7 6-6" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <line x1="7" y1="15" x2="7" y2="18" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="mic-hint">Tap to respond</div>
+    </div>
+    <div class="scenario-tag">Beach · Yacht · Private jet · Luxury house · Tesla · Sunglasses & linen</div>
+  </div>
+
+</div>
+
+</body>
+</html>
