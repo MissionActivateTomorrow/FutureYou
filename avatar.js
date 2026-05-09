@@ -57,15 +57,16 @@ function discoverLipSync(gltf) {
   morphMesh = null; morphDict = null; jawBone = null;
   lerpedMorphs = {};
 
+  // Pick the mesh with the most viseme_ targets (head mesh), not just any mesh
+  let bestMesh = null, bestDict = null, bestScore = -1;
+
   gltf.scene.traverse((node) => {
     if (node.isMesh && node.morphTargetDictionary) {
       const keys = Object.keys(node.morphTargetDictionary);
-      if (keys.length > 0 && !morphMesh) {
-        morphMesh = node;
-        morphDict = node.morphTargetDictionary;
-        console.log('[LipSync] Morph targets on:', node.name);
-        console.log('[LipSync] Names:', keys.join(', '));
-        keys.forEach(k => (lerpedMorphs[k] = 0));
+      if (keys.length > 0) {
+        const visemeCount = keys.filter(k => k.startsWith('viseme_')).length;
+        const score = visemeCount * 1000 + keys.length;
+        if (score > bestScore) { bestScore = score; bestMesh = node; bestDict = node.morphTargetDictionary; }
       }
     }
     if (!jawBone && /jaw/i.test(node.name)) {
@@ -74,6 +75,15 @@ function discoverLipSync(gltf) {
     }
     if (node.isBone) console.log('[LipSync] Bone:', node.name);
   });
+
+  if (bestMesh) {
+    morphMesh = bestMesh;
+    morphDict = bestDict;
+    const keys = Object.keys(morphDict);
+    console.log('[LipSync] Morph targets on:', morphMesh.name);
+    console.log('[LipSync] Names:', keys.join(', '));
+    keys.forEach(k => (lerpedMorphs[k] = 0));
+  }
 
   if (!morphMesh && !jawBone)
     console.log('[LipSync] No morph targets or jaw bone — lip sync disabled');
@@ -107,18 +117,23 @@ function animateLipSync(delta) {
   const lerpFactor = Math.min(1, 14 * delta);
   const restFactor = Math.min(1,  3 * delta);
 
+  // Always advance phase so both paths have a running oscillation
+  if (speaking) sinePhase += delta * 4.0 * Math.PI * 2;
+
   if (morphMesh && morphDict) {
-    const weights = speaking ? (PHONEME_WEIGHTS[currentPhoneme] || {}) : {};
+    const phonemeWeights = speaking ? (PHONEME_WEIGHTS[currentPhoneme] || {}) : {};
     for (const name of Object.keys(morphDict)) {
-      const target = weights[name] || 0;
+      let target = phonemeWeights[name] || 0;
+      // Baseline sine on jawOpen — mouth moves even when onboundary never fires
+      if (speaking && /^jawOpen$/i.test(name)) {
+        target = Math.max(target, 0.35 * Math.abs(Math.sin(sinePhase)));
+      }
       const f = target > lerpedMorphs[name] ? lerpFactor : restFactor;
       lerpedMorphs[name] += (target - lerpedMorphs[name]) * f;
       morphMesh.morphTargetInfluences[morphDict[name]] = lerpedMorphs[name];
     }
   } else if (jawBone) {
     if (speaking) {
-      const hz = 3.5 + Math.min((window._speakBoundaryTick || 0) * 0.08, 2);
-      sinePhase += delta * hz * Math.PI * 2;
       const amp   = PHONEME_AMP[currentPhoneme] ?? 0.18;
       const noise = 0.85 + 0.15 * Math.sin(sinePhase * 0.31);
       jawAngle += (amp * noise * Math.abs(Math.sin(sinePhase)) - jawAngle) * lerpFactor;
