@@ -4,6 +4,15 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 let scene, camera, renderer, avatarMesh;
 let clock;
 
+// Lip sync state
+let morphMesh = null;
+let morphDict = null;
+let jawBone   = null;
+let currentPhoneme = 'rest';
+let lerpedMorphs = {};
+let sinePhase = 0;
+let jawAngle  = 0;
+
 // ── SCENE ─────────────────────────────────────────────────────────
 export function initScene() {
   const canvas = document.getElementById('face-canvas');
