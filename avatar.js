@@ -58,10 +58,8 @@ function discoverLipSync(gltf) {
   lerpedMorphs = {};
 
   let bestMesh = null, bestDict = null, bestScore = -1;
-  let headBone = null;
 
   gltf.scene.traverse((node) => {
-    // Log every mesh and its morph target status
     if (node.isMesh) {
       const md   = node.morphTargetDictionary;
       const keys = md ? Object.keys(md) : [];
@@ -72,21 +70,13 @@ function discoverLipSync(gltf) {
         if (score > bestScore) { bestScore = score; bestMesh = node; bestDict = md; }
       }
     }
-
     if (node.isBone) {
       if (!jawBone && /jaw/i.test(node.name)) {
         jawBone = node;
         console.log('[LipSync] Jaw bone:', node.name);
       }
-      if (!headBone && node.name === 'Head') headBone = node;
     }
   });
-
-  // No jaw bone found — use Head bone as a subtle speech-rhythm fallback
-  if (!jawBone && headBone) {
-    jawBone = headBone;
-    console.log('[LipSync] No jaw bone — using Head bone for subtle speaking motion');
-  }
 
   if (bestMesh) {
     morphMesh = bestMesh;
@@ -97,7 +87,7 @@ function discoverLipSync(gltf) {
   }
 
   if (!morphMesh && !jawBone)
-    console.log('[LipSync] Nothing to animate — lip sync disabled');
+    console.log('[LipSync] Avatar has no morph targets or jaw bone. Re-export with visemes enabled for lip sync.');
 
   window._lipSyncMesh = morphMesh;
   window._lipSyncJaw  = jawBone;
@@ -144,22 +134,14 @@ function animateLipSync(delta) {
       morphMesh.morphTargetInfluences[morphDict[name]] = lerpedMorphs[name];
     }
   } else if (jawBone) {
-    const isHeadFallback = jawBone.name === 'Head';
     if (speaking) {
-      const baseAmp = PHONEME_AMP[currentPhoneme] ?? 0.18;
-      // Head-bone fallback uses 8% amplitude — barely perceptible rhythm, not a nod
-      const amp   = isHeadFallback ? baseAmp * 0.08 : baseAmp;
+      const amp   = PHONEME_AMP[currentPhoneme] ?? 0.18;
       const noise = 0.85 + 0.15 * Math.sin(sinePhase * 0.31);
       jawAngle += (amp * noise * Math.abs(Math.sin(sinePhase)) - jawAngle) * lerpFactor;
     } else {
       jawAngle += (0 - jawAngle) * restFactor;
     }
-    if (isHeadFallback) {
-      // Tiny Z tilt (side-to-side) is less jarring than X nod during speech
-      jawBone.rotation.z = jawAngle;
-    } else {
-      jawBone.rotation.x = -jawAngle;
-    }
+    jawBone.rotation.x = -jawAngle;
   }
 }
 
