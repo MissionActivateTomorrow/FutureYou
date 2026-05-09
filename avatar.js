@@ -138,6 +138,12 @@ function animate() {
   renderer.render(scene, camera);
 }
 
+// ── PHONEME STATE ──────────────────────────────────────────────────
+export function setCurrentPhoneme(phonemeGroup) {
+  currentPhoneme = phonemeGroup;
+}
+window._setPhoneme = setCurrentPhoneme;
+
 // ── SPEAKING STATE ─────────────────────────────────────────────────
 export function setSpeaking(state) {
   window._futureSpeaking = state;
