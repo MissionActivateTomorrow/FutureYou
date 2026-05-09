@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:developers.googleblog.com)",
+      "WebSearch",
+      "WebFetch(domain:discuss.ai.google.dev)"
+    ]
+  }
+}
