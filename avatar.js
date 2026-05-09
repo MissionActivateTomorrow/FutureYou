@@ -47,9 +47,39 @@ export function loadAvatar(glbUrl) {
 
   new GLTFLoader().load(glbUrl, (gltf) => {
     avatarMesh = gltf.scene;
+    discoverLipSync(gltf);
     scene.add(avatarMesh);
     window.dispatchEvent(new CustomEvent('avatar-loaded'));
   }, undefined, err => console.error('Avatar load error:', err));
+}
+
+function discoverLipSync(gltf) {
+  morphMesh = null; morphDict = null; jawBone = null;
+  lerpedMorphs = {};
+
+  gltf.scene.traverse((node) => {
+    if (node.isMesh && node.morphTargetDictionary) {
+      const keys = Object.keys(node.morphTargetDictionary);
+      if (keys.length > 0 && !morphMesh) {
+        morphMesh = node;
+        morphDict = node.morphTargetDictionary;
+        console.log('[LipSync] Morph targets on:', node.name);
+        console.log('[LipSync] Names:', keys.join(', '));
+        keys.forEach(k => (lerpedMorphs[k] = 0));
+      }
+    }
+    if (!jawBone && /jaw/i.test(node.name)) {
+      jawBone = node;
+      console.log('[LipSync] Jaw bone:', node.name);
+    }
+    if (node.isBone) console.log('[LipSync] Bone:', node.name);
+  });
+
+  if (!morphMesh && !jawBone)
+    console.log('[LipSync] No morph targets or jaw bone — lip sync disabled');
+
+  window._lipSyncMesh = morphMesh;
+  window._lipSyncJaw  = jawBone;
 }
 
 // ── IDLE HEAD MOVEMENT ─────────────────────────────────────────────
