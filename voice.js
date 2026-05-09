@@ -1,3 +1,5 @@
+import { setCurrentPhoneme } from './avatar.js';
+
 // ── SPEECH SYNTHESIS ─────────────────────────────────────────────
 let onSpeakStart = null;
 let onSpeakEnd   = null;
@@ -26,6 +28,15 @@ function clearSpeakPoll() {
   if (speakPollTimer) { clearInterval(speakPollTimer); speakPollTimer = null; }
 }
 
+function classifyPhoneme(word) {
+  const w = word.toLowerCase();
+  if (/[pbm]/.test(w))         return 'mm';
+  if (/sh|ch|[sz]/.test(w))   return 'ss';
+  if (/[ou]/.test(w))          return 'oo';
+  if (/[aei]/.test(w))         return 'aa';
+  return 'rest';
+}
+
 function speak(text) {
   return new Promise((resolve) => {
     window.speechSynthesis.cancel();
@@ -52,6 +63,7 @@ function speak(text) {
       ended = true;
       window._futureSpeaking = false;
       clearSpeakPoll();
+      setCurrentPhoneme('rest');
       if (onSpeakEnd) onSpeakEnd();
       activeUtterance = null;
       resolve();
@@ -67,10 +79,11 @@ function speak(text) {
     };
     utterance.onend      = finish;
     utterance.onerror    = finish;
-    // onboundary fires at word boundaries — use it to keep the jaw oscillating naturally
     utterance.onboundary = (e) => {
-      // Reset the oscillation phase slightly at each word boundary for realism
-      if (e.name === 'word') window._speakBoundaryTick = (window._speakBoundaryTick || 0) + 1;
+      if (e.name !== 'word') return;
+      window._speakBoundaryTick = (window._speakBoundaryTick || 0) + 1;
+      const word = text.slice(e.charIndex, e.charIndex + (e.charLength || 5));
+      setCurrentPhoneme(classifyPhoneme(word));
     };
 
     window.speechSynthesis.speak(utterance);
