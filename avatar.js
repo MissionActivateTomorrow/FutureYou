@@ -57,36 +57,47 @@ function discoverLipSync(gltf) {
   morphMesh = null; morphDict = null; jawBone = null;
   lerpedMorphs = {};
 
-  // Pick the mesh with the most viseme_ targets (head mesh), not just any mesh
   let bestMesh = null, bestDict = null, bestScore = -1;
+  let headBone = null;
 
   gltf.scene.traverse((node) => {
-    if (node.isMesh && node.morphTargetDictionary) {
-      const keys = Object.keys(node.morphTargetDictionary);
+    // Log every mesh and its morph target status
+    if (node.isMesh) {
+      const md   = node.morphTargetDictionary;
+      const keys = md ? Object.keys(md) : [];
+      console.log('[LipSync] Mesh:', node.name, '| morphTargets:', keys.length ? keys.join(', ') : 'none');
       if (keys.length > 0) {
         const visemeCount = keys.filter(k => k.startsWith('viseme_')).length;
         const score = visemeCount * 1000 + keys.length;
-        if (score > bestScore) { bestScore = score; bestMesh = node; bestDict = node.morphTargetDictionary; }
+        if (score > bestScore) { bestScore = score; bestMesh = node; bestDict = md; }
       }
     }
-    if (!jawBone && /jaw/i.test(node.name)) {
-      jawBone = node;
-      console.log('[LipSync] Jaw bone:', node.name);
+
+    if (node.isBone) {
+      if (!jawBone && /jaw/i.test(node.name)) {
+        jawBone = node;
+        console.log('[LipSync] Jaw bone:', node.name);
+      }
+      if (!headBone && node.name === 'Head') headBone = node;
     }
-    if (node.isBone) console.log('[LipSync] Bone:', node.name);
   });
+
+  // No jaw bone found — use Head bone as a subtle speech-rhythm fallback
+  if (!jawBone && headBone) {
+    jawBone = headBone;
+    console.log('[LipSync] No jaw bone — using Head bone for subtle speaking motion');
+  }
 
   if (bestMesh) {
     morphMesh = bestMesh;
     morphDict = bestDict;
     const keys = Object.keys(morphDict);
-    console.log('[LipSync] Morph targets on:', morphMesh.name);
-    console.log('[LipSync] Names:', keys.join(', '));
+    console.log('[LipSync] Selected mesh:', morphMesh.name, '| keys:', keys.join(', '));
     keys.forEach(k => (lerpedMorphs[k] = 0));
   }
 
   if (!morphMesh && !jawBone)
-    console.log('[LipSync] No morph targets or jaw bone — lip sync disabled');
+    console.log('[LipSync] Nothing to animate — lip sync disabled');
 
   window._lipSyncMesh = morphMesh;
   window._lipSyncJaw  = jawBone;
@@ -133,14 +144,22 @@ function animateLipSync(delta) {
       morphMesh.morphTargetInfluences[morphDict[name]] = lerpedMorphs[name];
     }
   } else if (jawBone) {
+    const isHeadFallback = jawBone.name === 'Head';
     if (speaking) {
-      const amp   = PHONEME_AMP[currentPhoneme] ?? 0.18;
+      const baseAmp = PHONEME_AMP[currentPhoneme] ?? 0.18;
+      // Head-bone fallback uses 8% amplitude — barely perceptible rhythm, not a nod
+      const amp   = isHeadFallback ? baseAmp * 0.08 : baseAmp;
       const noise = 0.85 + 0.15 * Math.sin(sinePhase * 0.31);
       jawAngle += (amp * noise * Math.abs(Math.sin(sinePhase)) - jawAngle) * lerpFactor;
     } else {
       jawAngle += (0 - jawAngle) * restFactor;
     }
-    jawBone.rotation.x = -jawAngle;
+    if (isHeadFallback) {
+      // Tiny Z tilt (side-to-side) is less jarring than X nod during speech
+      jawBone.rotation.z = jawAngle;
+    } else {
+      jawBone.rotation.x = -jawAngle;
+    }
   }
 }
 
