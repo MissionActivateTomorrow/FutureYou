@@ -82,6 +82,16 @@ function discoverLipSync(gltf) {
   window._lipSyncJaw  = jawBone;
 }
 
+// ── LIP SYNC TABLES ───────────────────────────────────────────────
+const PHONEME_WEIGHTS = {
+  aa:   { viseme_aa: 0.75, viseme_E: 0.25, jawOpen: 0.60 },
+  oo:   { viseme_O:  0.80, viseme_U: 0.40, jawOpen: 0.40 },
+  mm:   { viseme_PP: 0.90, jawOpen:  0.05 },
+  ss:   { viseme_SS: 0.70, viseme_CH: 0.30, viseme_DD: 0.20, jawOpen: 0.15 },
+  rest: {},
+};
+const PHONEME_AMP = { aa: 0.30, oo: 0.22, mm: 0.04, ss: 0.12, rest: 0.18 };
+
 // ── IDLE HEAD MOVEMENT ─────────────────────────────────────────────
 let idleT = 0;
 function animateIdle(delta) {
