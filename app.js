@@ -54,25 +54,98 @@ window.submitSurvey = function() {
   window.appState.salaryRange     = salaryEl.value;
   window.appState.contributes     = pensionEl?.value === 'yes';
   window.appState.userAge         = parseInt(document.getElementById('input-age').value);
-  window.appState.environmentTier = 0; // start at tier 0; demo switcher changes it live
+  window.appState.environmentTier = 0;
   window.appState.scenarios       = calculateScenarios(window.appState.salaryRange, window.appState.userAge);
   goTo('s-avatar');
+  _autoLoadDemoAvatar();
 };
+
+function _autoLoadDemoAvatar() {
+  const steps = [
+    [800,  'Ageing your avatar to 65…'],
+    [1800, 'Adding 40 years of experience…'],
+    [2800, 'Almost ready…'],
+  ];
+  const sub   = document.getElementById('avatar-gen-sub');
+  const title = document.getElementById('avatar-gen-title');
+  steps.forEach(([ms, txt]) => setTimeout(() => { if (sub) sub.textContent = txt; }, ms));
+  setTimeout(() => {
+    if (title) title.textContent = 'Meet your future self.';
+    window.useDemoAvatar();
+  }, 3400);
+}
 
 window.switchEnv = function(tier, btn) {
   document.querySelectorAll('.env-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   if (window._setEnvironmentTier) window._setEnvironmentTier(tier);
-
-  // Update appState so the LLM prompt reflects the new tier
   if (window.appState) window.appState.environmentTier = tier;
-
-  // If already on the talk screen, restart the conversation with the new persona
+  updateStatsSheet();
   const talkSection = document.getElementById('s-talk');
   if (talkSection && talkSection.classList.contains('active')) {
     window.startConversation();
   }
 };
+
+// ── STATS BOTTOM SHEET ────────────────────────────────────────────
+const TIER_MONTHLY = { 0: 380,  1: 680,   3: 1100,  5: 1850  };
+const TIER_SAVED   = { 0: 0,    1: 10000, 3: 50000, 5: 130000 };
+const STATE_PENSION = 540; // Latvia baseline
+
+function updateStatsSheet() {
+  const state = window.appState || {};
+  const tier  = state.environmentTier;
+  const yearsLeft = Math.max(0, 65 - (state.userAge || 25));
+  const monthlySalary = { '<800':750,'800-1500':1150,'1500-3000':2250,'3000+':3500 }[state.salaryRange] || 1150;
+  const monthlyContrib = Math.round(monthlySalary * 0.10);
+  const annualRefund   = Math.round(monthlyContrib * 12 * 0.20);
+
+  let pension, saved, extra;
+
+  if (tier !== undefined && TIER_MONTHLY[tier] !== undefined) {
+    pension = TIER_MONTHLY[tier];
+    saved   = TIER_SAVED[tier];
+    extra   = Math.max(0, pension - STATE_PENSION);
+  } else if (state.scenarios) {
+    const s = state.scenarios;
+    pension = state.contributes ? s.with.monthlyPension : s.without.monthlyPension;
+    saved   = state.contributes ? s.with.totalSaved : 0;
+    extra   = s.difference || 0;
+  } else {
+    pension = STATE_PENSION; saved = 0; extra = 0;
+  }
+
+  const fmt = (n) => '€' + Number(n).toLocaleString();
+  document.getElementById('stat-pension').textContent  = fmt(pension);
+  document.getElementById('stat-pension-sub').textContent =
+    tier === 0 ? 'state pension only — no private savings' :
+    tier === 5 ? 'state + 3rd pillar — fully on track' :
+                 'state + 3rd pillar combined';
+  document.getElementById('stat-saved').textContent   = saved > 0 ? fmt(saved) : '€0';
+  document.getElementById('stat-refund').textContent  = fmt(annualRefund);
+  document.getElementById('stat-contrib').textContent = fmt(monthlyContrib);
+  document.getElementById('stat-years').textContent   = yearsLeft + ' yrs';
+  document.getElementById('stat-extra').textContent   = extra > 0 ? '+' + fmt(extra) : '€0';
+}
+
+window.toggleStatsSheet = function() {
+  const sheet = document.getElementById('stats-sheet');
+  sheet.classList.toggle('open');
+  if (sheet.classList.contains('open')) updateStatsSheet();
+};
+
+// Swipe-up gesture on the handle
+(function initSheetSwipe() {
+  let startY = 0;
+  const handle = document.getElementById('stats-handle');
+  if (!handle) return;
+  handle.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, { passive: true });
+  handle.addEventListener('touchend', e => {
+    const dy = startY - e.changedTouches[0].clientY;
+    if (dy > 40)  document.getElementById('stats-sheet').classList.add('open');
+    if (dy < -40) document.getElementById('stats-sheet').classList.remove('open');
+  }, { passive: true });
+})();
 
 // ── START CONVERSATION (called after avatar loads) ─────────────────
 window.startConversation = async function() {
@@ -160,14 +233,24 @@ window.sendTextMessage = async function() {
   await handleUserSpeech(text);
 };
 
+// ── CAPTION TOGGLE ───────────────────────────────────────
+let captionEnabled = false;
+window.toggleCaption = function() {
+  captionEnabled = !captionEnabled;
+  const bubble = document.getElementById('speech-bubble');
+  const btn    = document.getElementById('caption-toggle');
+  bubble.style.display = captionEnabled ? '' : 'none';
+  btn.classList.toggle('active', captionEnabled);
+};
+
 // ── SUBTITLE ─────────────────────────────────────────────────────
 function showSubtitle(text) {
   const el = document.getElementById('speech-bubble');
+  el.textContent = text; // always update text
+  if (!captionEnabled) return; // only show if enabled
   el.style.opacity = '0';
-  setTimeout(() => {
-    el.textContent = text;
-    el.style.opacity = '1';
-  }, 150);
+  el.style.display = '';
+  setTimeout(() => { el.style.opacity = '1'; }, 150);
 }
 
 // ── SHARE ─────────────────────────────────────────────────────────

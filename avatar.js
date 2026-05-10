@@ -26,7 +26,7 @@ const IDLE_ANIM_URL = 'https://raw.githubusercontent.com/avaturn/avaturn-threejs
 export function initScene(totalSaved = 0) {
   const canvas = document.getElementById('face-canvas');
   const w = window.innerWidth;
-  const h = window.innerHeight;
+  const h = window.innerHeight - 120; // exclude nav (68) + stats handle (52)
 
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
   renderer.setSize(w, h);
@@ -154,8 +154,8 @@ function _touchDist(a, b) {
 function _onResize() {
   if (!renderer || !camera) return;
   const w = window.innerWidth;
-  const h = window.innerHeight;
-  const isPortrait = h > w;
+  const h = window.innerHeight - 120; // exclude nav + handle
+  const isPortrait = window.innerHeight > w;
   renderer.setSize(w, h);
   camera.aspect  = w / h;
   camera.fov     = isPortrait ? 62 : 50;
@@ -343,12 +343,16 @@ window.quickResume = function() {
   window.appState = window.appState || {};
   window.appState.userName = window.appState.userName || 'You';
   window.appState.environmentTier = 0;
-  const url = localStorage.getItem('lastAvatarUrl');
-  if (url) {
-    _launchTalkScreen(url);
-  } else {
-    window.goTo('s-avatar'); // skip survey, go straight to avatar creation
-  }
+  const url = localStorage.getItem('lastAvatarUrl') || DEMO_AVATAR_URL;
+  _launchTalkScreen(url);
+};
+
+// Demo avatar — Mixamo-rigged GLB, no login required
+const DEMO_AVATAR_URL = 'https://threejs.org/examples/models/gltf/Michelle.glb';
+
+window.useDemoAvatar = function() {
+  const saved = localStorage.getItem('lastAvatarUrl');
+  _launchTalkScreen(saved || DEMO_AVATAR_URL);
 };
 
 window.startAvaturn = startAvaturn;
