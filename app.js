@@ -60,11 +60,18 @@ window.submitSurvey = function() {
 };
 
 window.switchEnv = function(tier, btn) {
-  // Update active button
   document.querySelectorAll('.env-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  // Update the 3D environment
   if (window._setEnvironmentTier) window._setEnvironmentTier(tier);
+
+  // Update appState so the LLM prompt reflects the new tier
+  if (window.appState) window.appState.environmentTier = tier;
+
+  // If already on the talk screen, restart the conversation with the new persona
+  const talkSection = document.getElementById('s-talk');
+  if (talkSection && talkSection.classList.contains('active')) {
+    window.startConversation();
+  }
 };
 
 // ── START CONVERSATION (called after avatar loads) ─────────────────

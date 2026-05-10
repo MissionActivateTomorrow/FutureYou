@@ -440,6 +440,7 @@ export class Environment {
   }
 
   _add(o) { this.scene.add(o); this.assets.push(o); }
+  _addS(o, s) { o.scale.setScalar(s); return this._add(o); } // add with uniform scale
 
   _glb(tok, url, x, y, z, sc, ry = 0) {
     _loader.load(url, (gltf) => {
@@ -457,27 +458,30 @@ export class Environment {
     const tok = ++this._token;
     const glb = (url, x, y, z, sc, ry = 0) => this._glb(tok, url, x, y, z, sc, ry);
 
+    const S = this._addS.bind(this);
+    // Assets are pushed further back in z (appear higher in viewport due to perspective)
+    // and shifted to left/right sides so the centred speech bubble doesn't cover them.
+
     switch (tier) {
 
       // ────────────────────────────────────────────────────────────
       case 0: // NOTHING — desolate wasteland
       // ────────────────────────────────────────────────────────────
-        this._add(deadTree(-2.2, -2.5, 1.1));
-        this._add(deadTree( 1.8, -3.0, 0.9));
-        this._add(deadTree(-0.5, -3.8, 1.3));
-        this._add(deadTree( 3.2, -2.2, 0.75));
-        this._add(deadTree(-3.5, -3.5, 1.0));
-        this._add(rock(-1.2, -2.0, 1.2));
-        this._add(rock( 0.8, -1.8, 0.9));
-        this._add(rock( 2.5, -3.2, 1.4));
-        this._add(rock(-3.0, -2.5, 1.0));
-        this._add(rock( 1.5, -4.0, 1.1));
-        this._add(brokenFence(-1.5, -1.7));
-        this._add(brokenFence( 0.5, -2.8, 3));
-        for (let i = 0; i < 14; i++) {
+        this._add(deadTree(-1.4, -2.0, 0.75));   // left side, far
+        this._add(deadTree( 1.3, -2.2, 0.68));   // right side, far
+        this._add(deadTree(-0.8, -1.5, 0.58));   // left, mid
+        this._add(deadTree( 1.8, -1.6, 0.55));   // right, mid
+        this._add(deadTree(-2.0, -2.6, 0.80));   // far left
+        this._add(rock(-1.1, -1.4, 0.65));
+        this._add(rock( 1.2, -1.3, 0.60));
+        this._add(rock(-0.4, -1.8, 0.70));
+        this._add(rock( 0.6, -2.0, 0.55));
+        // Broken fence spans the background across both sides
+        S(brokenFence(-2.0, -1.8, 14), 0.80);
+        for (let i = 0; i < 10; i++) {
           this._add(dryGrassTuft(
-            (Math.random() - 0.5) * 7,
-            -1.5 - Math.random() * 4
+            (Math.random() - 0.5) * 4,
+            -1.2 - Math.random() * 1.4
           ));
         }
         break;
@@ -485,72 +489,87 @@ export class Environment {
       // ────────────────────────────────────────────────────────────
       case 1: // UNDER €10k — simple park / modest life
       // ────────────────────────────────────────────────────────────
-        glb(M.tree,  -1.8, 0, -2.8, 0.40);
-        glb(M.tree2,  2.5, 0, -2.5, 0.34, Math.PI * 0.6);
-        glb(M.tree2, -3.2, 0, -3.5, 0.30, Math.PI * 0.2);
-        glb(M.bench,  0.8, 0, -1.9, 0.45);
-        this._add(lampPost(-0.4, -1.6));
-        this._add(lampPost( 2.2, -2.0));
+        // Trees on sides, far enough back to appear above UI
+        glb(M.tree,  -1.4, 0, -2.0, 0.38);
+        glb(M.tree2,  1.5, 0, -1.8, 0.32, Math.PI * 0.6);
+        glb(M.tree2, -2.0, 0, -2.5, 0.28, Math.PI * 0.2);
+        // Bench to the right, mid-distance
+        glb(M.bench,  1.0, 0, -1.5, 0.38);
+        // Lamp posts flanking the path
+        S(lampPost(-0.6, -1.5), 0.75);
+        S(lampPost( 0.6, -1.5), 0.75);
+        // Path goes away from camera down the center
         for (let i = 0; i < 5; i++) {
-          this._add(stonePathSegment(0.0, -1.4 - i * 0.5));
+          this._add(stonePathSegment(0.0, -1.2 - i * 0.40));
         }
-        this._add(flowerPatch(-1.0, -2.0, 10));
-        this._add(flowerPatch( 1.4, -2.2,  8));
-        this._add(flowerPatch( 0.3, -3.0,  7));
-        this._add(woodFence(-3.5, -1.8, 6));
-        this._add(woodFence( 0.8, -1.6, 5, Math.PI / 2));
-        this._add(rock( 1.8, -3.5, 0.7));
-        this._add(rock(-2.5, -3.0, 0.8));
+        // Flowers on left and right sides, not center
+        this._add(flowerPatch(-1.0, -1.5,  9));
+        this._add(flowerPatch( 1.2, -1.6,  8));
+        this._add(flowerPatch(-0.5, -2.2,  6));
+        // Fence spanning the back
+        S(woodFence(-2.4, -1.8, 11), 0.78);
+        this._add(rock( 1.5, -2.0, 0.55));
+        this._add(rock(-1.7, -1.9, 0.60));
         break;
 
       // ────────────────────────────────────────────────────────────
       case 3: // €10k – €50k — comfortable family home
       // ────────────────────────────────────────────────────────────
-        this._add(house(2.2, -3.2));
-        this._add(driveway(1.2, -1.9));
-        glb(M.car,    0.9, 0, -1.6,  0.32, Math.PI * 0.05);
-        glb(M.tree,  -2.0, 0, -2.8,  0.42);
-        glb(M.tree2,  3.8, 0, -2.5,  0.36, Math.PI * 0.5);
-        glb(M.tree,  -3.5, 0, -3.8,  0.33, Math.PI * 0.9);
-        this._add(flowerPatch(-0.4, -2.0,  9));
-        this._add(flowerPatch( 1.0, -3.8, 11));
-        this._add(flowerPatch(-1.5, -3.5,  8));
-        this._add(hedge(-0.2, -1.7, 0.6));
-        this._add(hedge( 0.5, -1.7, 0.6));
-        this._add(hedge( 2.8, -1.5, 1.2));
-        this._add(gardenLight(-0.8, -2.4));
-        this._add(gardenLight( 1.6, -2.4));
-        this._add(woodFence(-4.0, -1.8, 8));
-        this._add(woodFence(-4.0, -2.1, 1, Math.PI / 2));
-        this._add(rock(-2.8, -2.0, 0.9));
+        // House pushed right and further back — upper floors visible above UI
+        S(house(1.6, -2.2), 0.65);
+        S(driveway(0.8, -1.5), 0.80);
+        glb(M.car,    0.5, 0, -1.2, 0.26, Math.PI * 0.05);
+        // Trees on both sides far back
+        glb(M.tree,  -1.6, 0, -2.0, 0.36);
+        glb(M.tree2,  2.4, 0, -1.8, 0.30, Math.PI * 0.5);
+        glb(M.tree,  -2.4, 0, -2.5, 0.28, Math.PI * 0.9);
+        // Flowers left and right
+        this._add(flowerPatch(-0.8, -1.6,  9));
+        this._add(flowerPatch( 1.0, -2.0, 10));
+        this._add(flowerPatch(-1.4, -2.2,  7));
+        // Hedges as foreground edge left and right
+        S(hedge(-0.5, -1.1, 0.55), 0.85);
+        S(hedge( 0.4, -1.1, 0.55), 0.85);
+        S(hedge( 1.4, -1.0, 0.90), 0.85);
+        // Garden lights flanking
+        S(gardenLight(-0.9, -1.5), 0.80);
+        S(gardenLight( 1.2, -1.5), 0.80);
+        // Fence far left background
+        S(woodFence(-3.0, -1.8, 9), 0.75);
         break;
 
       // ────────────────────────────────────────────────────────────
       case 5: // OVER €50k — luxury estate
       // ────────────────────────────────────────────────────────────
-        this._add(villa(2.6, -3.8));
-        this._add(pool(-0.8, -2.8));
-        this._add(fountain(-3.2, -2.0));
-        glb(M.car,   0.6, 0, -1.7,  0.36, -Math.PI * 0.08);
-        glb(M.car,   2.0, 0, -1.6,  0.32,  Math.PI * 0.06);
-        glb(M.tree,  -2.4, 0, -2.5, 0.55);
-        glb(M.tree2,  4.4, 0, -2.8, 0.50, Math.PI * 0.4);
-        glb(M.tree,  -4.0, 0, -4.0, 0.48, Math.PI * 0.7);
-        glb(M.tree2,  3.0, 0, -4.5, 0.45, Math.PI * 1.1);
-        glb(M.tree,  -1.5, 0, -5.0, 0.40, Math.PI * 0.3);
-        this._add(manicuredHedge(-0.2, -1.6, 1.0));
-        this._add(manicuredHedge( 1.2, -1.6, 0.8));
-        this._add(manicuredHedge( 2.6, -1.5, 1.2));
-        this._add(manicuredHedge(-2.0, -2.0, 0.6));
-        this._add(ironFence(-5.0, -1.5, 8));
-        this._add(ironFence(-5.0, -1.7, 2, Math.PI / 2));
-        this._add(ironFence( 1.2, -1.5, 6));
-        this._add(gardenLight(-1.5, -1.7));
-        this._add(gardenLight( 0.2, -1.7));
-        this._add(gardenLight( 3.5, -1.7));
-        this._add(flowerPatch(-3.5, -3.0, 14));
-        this._add(flowerPatch( 1.5, -4.5, 12));
-        this._add(flowerPatch(-1.8, -4.8, 10));
+        // Villa far right, pushed back — columns and upper floor clearly visible
+        S(villa(2.0, -2.8), 0.60);
+        // Pool left of avatar, mid-distance
+        S(pool(-0.8, -1.8), 0.70);
+        // Fountain far left
+        S(fountain(-2.0, -1.6), 0.65);
+        // Two cars in foreground sides
+        glb(M.car,   0.4, 0, -1.0, 0.27, -Math.PI * 0.08);
+        glb(M.car,   1.5, 0, -1.1, 0.24,  Math.PI * 0.06);
+        // Trees flanking
+        glb(M.tree,  -1.6, 0, -1.8, 0.44);
+        glb(M.tree2,  2.6, 0, -2.0, 0.38, Math.PI * 0.4);
+        glb(M.tree,  -2.4, 0, -2.5, 0.36, Math.PI * 0.7);
+        glb(M.tree2,  2.0, 0, -3.0, 0.34, Math.PI * 1.1);
+        // Manicured hedges as foreground edge, left and right
+        S(manicuredHedge(-0.5, -1.1, 0.80), 0.80);
+        S(manicuredHedge( 0.6, -1.0, 0.65), 0.80);
+        S(manicuredHedge( 1.6, -0.9, 0.90), 0.80);
+        S(manicuredHedge(-1.5, -1.4, 0.65), 0.80);
+        // Iron fence spanning background
+        S(ironFence(-3.5, -1.5, 9), 0.70);
+        S(ironFence( 0.8, -1.5, 6), 0.70);
+        // Garden lights flanking both sides
+        S(gardenLight(-1.2, -1.1), 0.75);
+        S(gardenLight( 0.2, -1.1), 0.75);
+        S(gardenLight( 2.0, -1.0), 0.75);
+        this._add(flowerPatch(-2.2, -2.0, 12));
+        this._add(flowerPatch( 1.2, -2.5, 10));
+        this._add(flowerPatch(-1.0, -2.8,  9));
         break;
     }
   }

@@ -219,3 +219,56 @@ h2 { font-family:'Playfair Display',serif; font-size:clamp(24px,7vw,38px); line-
 /* CTA */
 .cta-wrap { display:flex; flex-direction:column; align-items:center; gap:20px; text-align:center; width:100%; max-width:400px; }
 .team-credit { color:var(--text-muted); font-size:13px; line-height:1.6; }
+
+/* ── BOTTOM NAV BAR ──────────────────────────────────────────────── */
+#app-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 68px;
+  background: rgba(10, 42, 30, 0.96);
+  border-top: 1px solid rgba(26, 210, 160, 0.15);
+  display: flex;
+  align-items: stretch;
+  z-index: 200;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.nav-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  position: relative;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: default;
+  opacity: 0.55;
+  transition: opacity 0.2s;
+  user-select: none;
+}
+
+.nav-tab.nav-active {
+  opacity: 1;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.nav-active-pill {
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 32px; height: 3px;
+  background: var(--accent);
+  border-radius: 0 0 4px 4px;
+}
+
+/* Push all section content above the nav bar */
+.section { padding-bottom: 88px; }
+.mic-hint { margin-bottom: 88px; }
