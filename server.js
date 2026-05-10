@@ -2,18 +2,26 @@ require('dotenv').config();
 const http = require('http');
 const fs   = require('fs');
 const path = require('path');
+const { OpenAI } = require('openai');
 
-const PORT    = 3000;
-const API_KEY = process.env.GEMINI_KEY;
-const GEMINI  = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${API_KEY}`;
+const PORT = 3000;
+const HF_TOKEN = process.env.HF_TOKEN;
+const MODEL = 'Qwen/Qwen3-32B:featherless-ai';
 
-if (!API_KEY) { console.error('ERROR: GEMINI_KEY missing in .env'); process.exit(1); }
+if (!HF_TOKEN) { console.error('ERROR: HF_TOKEN missing in .env'); process.exit(1); }
+
+const client = new OpenAI({
+  baseURL: 'https://router.huggingface.co/v1',
+  apiKey:  HF_TOKEN,
+});
 
 const MIME = {
   '.html': 'text/html',
   '.css':  'text/css',
   '.js':   'application/javascript',
+  '.mjs':  'application/javascript',
   '.glb':  'model/gltf-binary',
+  '.gltf': 'application/json',
   '.png':  'image/png',
   '.jpg':  'image/jpeg',
   '.ico':  'image/x-icon',
@@ -30,26 +38,47 @@ function readBody(req) {
   });
 }
 
-// ── forward to Gemini, return reply text ─────────────────────────
-async function callGemini(body) {
-  const res = await fetch(GEMINI, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body
-  });
-  const data = await res.json();
-  if (!res.ok) {
-    const msg = data?.error?.message || JSON.stringify(data);
-    console.error('Gemini API error:', res.status, msg);
-    throw new Error(msg);
+// ── convert Gemini-format payload → OpenAI messages ──────────────
+function toOpenAIMessages(payload) {
+  const messages = [];
+
+  // system_instruction → system message
+  const sys = payload.system_instruction?.parts?.[0]?.text;
+  if (sys) messages.push({ role: 'system', content: sys });
+
+  // contents (Gemini uses 'model', OpenAI uses 'assistant')
+  for (const turn of (payload.contents || [])) {
+    const role    = turn.role === 'model' ? 'assistant' : turn.role;
+    const content = turn.parts?.[0]?.text ?? '';
+    messages.push({ role, content });
   }
-  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "I'm here. Say that again?";
+
+  return messages;
+}
+
+// ── call Qwen via HuggingFace router ─────────────────────────────
+async function callQwen(rawBody) {
+  const payload  = JSON.parse(rawBody);
+  const messages = toOpenAIMessages(payload);
+  const maxTokens = payload.generationConfig?.maxOutputTokens ?? 150;
+  const temperature = payload.generationConfig?.temperature ?? 0.85;
+
+  const completion = await client.chat.completions.create({
+    model: MODEL,
+    messages,
+    max_tokens: maxTokens,
+    temperature,
+    extra_body: { chat_template_kwargs: { enable_thinking: false } },
+  });
+
+  const msg = completion.choices[0].message;
+  const text = msg.content || msg.reasoning || "I'm here. Say that again?";
+  return text.trim();
 }
 
 // ── HTTP server ───────────────────────────────────────────────────
 http.createServer(async (req, res) => {
 
-  // CORS for local dev
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
@@ -58,11 +87,11 @@ http.createServer(async (req, res) => {
   if (req.method === 'POST' && req.url === '/api/chat') {
     try {
       const body  = await readBody(req);
-      const reply = await callGemini(body);
+      const reply = await callQwen(body);
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ reply }));
     } catch (err) {
-      console.error('Gemini proxy error:', err.message);
+      console.error('Qwen error:', err.message);
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ reply: "Sorry, couldn't reach my future self right now." }));
     }
@@ -73,7 +102,6 @@ http.createServer(async (req, res) => {
   const filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url);
   const ext      = path.extname(filePath).toLowerCase();
 
-  // Block config.js — key stays server-side
   if (path.basename(filePath) === 'config.js') {
     res.writeHead(404); res.end('Not found'); return;
   }
@@ -84,4 +112,4 @@ http.createServer(async (req, res) => {
     res.end(data);
   });
 
-}).listen(PORT, () => console.log(`\n  FutureYou → http://localhost:${PORT}\n  API key: server-side only ✓\n`));
+}).listen(PORT, () => console.log(`\n  FutureYou → http://localhost:${PORT}\n  Model: ${MODEL}\n`));

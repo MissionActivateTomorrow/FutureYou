@@ -1,3 +1,11 @@
+// Defined early (before ES modules load) so onclick handlers never throw
+window.goTo = function(sectionId) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(sectionId);
+  if (target) target.classList.add('active');
+  window.scrollTo(0, 0);
+};
+
 const SALARY_MAP = { '<800':750, '800-1500':1150, '1500-3000':2250, '3000+':3500 };
 
 function calculateScenarios(salaryRange, age) {

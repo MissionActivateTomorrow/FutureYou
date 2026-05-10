@@ -4,7 +4,7 @@ import { setSpeaking } from './avatar.js';
 // ── GLOBAL STATE ──────────────────────────────────────────────────
 window.appState = {
   userName: '', userAge: 25, salaryRange: '1500-3000',
-  contributes: false, scenarios: null
+  contributes: false, currentSavings: 0, scenarios: null
 };
 
 let exchangeCount = 0;
@@ -51,11 +51,20 @@ window.submitSurvey = function() {
   const salaryEl  = document.querySelector('input[name="salary"]:checked');
   const pensionEl = document.querySelector('input[name="pension"]:checked');
   if (!salaryEl) { alert('Please select your salary!'); return; }
-  window.appState.salaryRange  = salaryEl.value;
-  window.appState.contributes  = pensionEl?.value === 'yes';
-  window.appState.userAge      = parseInt(document.getElementById('input-age').value);
-  window.appState.scenarios    = calculateScenarios(window.appState.salaryRange, window.appState.userAge);
+  window.appState.salaryRange     = salaryEl.value;
+  window.appState.contributes     = pensionEl?.value === 'yes';
+  window.appState.userAge         = parseInt(document.getElementById('input-age').value);
+  window.appState.environmentTier = 0; // start at tier 0; demo switcher changes it live
+  window.appState.scenarios       = calculateScenarios(window.appState.salaryRange, window.appState.userAge);
   goTo('s-avatar');
+};
+
+window.switchEnv = function(tier, btn) {
+  // Update active button
+  document.querySelectorAll('.env-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // Update the 3D environment
+  if (window._setEnvironmentTier) window._setEnvironmentTier(tier);
 };
 
 // ── START CONVERSATION (called after avatar loads) ─────────────────

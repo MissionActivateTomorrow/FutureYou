@@ -13,6 +13,17 @@
 <!-- PARTICLES -->
 <div id="particles"></div>
 
+<!-- Demo environment switcher — fixed top-right, fades in on hover -->
+<div id="env-switcher">
+  <span class="env-label">Demo</span>
+  <div class="env-btns">
+    <button class="env-btn active" onclick="switchEnv(0, this)">Nothing</button>
+    <button class="env-btn" onclick="switchEnv(1, this)">€10k</button>
+    <button class="env-btn" onclick="switchEnv(3, this)">€50k</button>
+    <button class="env-btn" onclick="switchEnv(5, this)">€50k+</button>
+  </div>
+</div>
+
 <!-- SECTION 1: LANDING -->
 <section id="s-landing" class="section active">
   <div class="hero-content">
@@ -99,7 +110,7 @@
     <!-- Teal glow ring around face -->
     <div class="face-ring" id="face-ring"></div>
     <!-- Loading overlay while GLB downloads -->
-    <div id="face-loading-overlay" style="position:absolute;inset:0;border-radius:50%;background:#0A2A1E;display:flex;align-items:center;justify-content:center;">
+    <div id="face-loading-overlay" style="position:absolute;inset:0;border-radius:12px;background:#0A2A1E;display:flex;align-items:center;justify-content:center;">
       <div class="pulse-ring" style="width:60px;height:60px;"></div>
     </div>
   </div>
@@ -154,8 +165,8 @@
 <script type="importmap">
 {
   "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    "three": "/node_modules/three/build/three.module.js",
+    "three/addons/": "/node_modules/three/examples/jsm/"
   }
 }
 </script>
