@@ -4,13 +4,15 @@ export interface UserProfile {
   goals: string;
   retirementVision: string;
   photoDataUrl?: string;
+  avatarColors?: { skin: string; hair: string };
+  avatarUrl?: string; // Ready Player Me GLB URL
 }
 
 export interface OnboardingQuestion {
   id: keyof UserProfile;
   avatarText: string;
   placeholder: string;
-  inputType: 'text' | 'textarea' | 'photo';
+  inputType: 'text' | 'textarea' | 'photo' | 'avatarUrl';
 }
 
 export const ONBOARDING_QUESTIONS: OnboardingQuestion[] = [
@@ -39,10 +41,10 @@ export const ONBOARDING_QUESTIONS: OnboardingQuestion[] = [
     inputType: 'textarea',
   },
   {
-    id: 'photoDataUrl',
-    avatarText: "Last thing — upload a photo so I actually look like you.",
-    placeholder: '',
-    inputType: 'photo',
+    id: 'avatarUrl',
+    avatarText: "Last thing — paste your Ready Player Me avatar URL so I look like you. (readyplayer.me — free, 2 mins)",
+    placeholder: 'https://models.readyplayer.me/YOUR_ID.glb',
+    inputType: 'avatarUrl',
   },
 ];
 

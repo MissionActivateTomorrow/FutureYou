@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { ONBOARDING_QUESTIONS, saveProfile, type UserProfile } from '@/lib/onboarding';
+import AvatarCreator from '@/components/AvatarCreator';
 
 const EMPTY_PROFILE: UserProfile = { name: '', age: '', goals: '', retirementVision: '' };
 
@@ -56,12 +57,36 @@ export default function OnboardingPage() {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
-      if (ev.target?.result) setPhotoPreview(ev.target.result as string);
+      const dataUrl = ev.target?.result as string;
+      if (!dataUrl) return;
+      setPhotoPreview(dataUrl);
+
+      // Extract skin + hair colors from the photo for avatar personalization
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 64;
+        canvas.height = 64;
+        const ctx = canvas.getContext('2d')!;
+        ctx.drawImage(img, 0, 0, 64, 64);
+        // Face center ≈ skin color
+        const skin = ctx.getImageData(32, 22, 1, 1).data;
+        // Top strip ≈ hair color
+        const hair = ctx.getImageData(32, 5, 1, 1).data;
+        setProfile((prev) => ({
+          ...prev,
+          avatarColors: {
+            skin: `rgb(${skin[0]},${skin[1]},${skin[2]})`,
+            hair: `rgb(${hair[0]},${hair[1]},${hair[2]})`,
+          },
+        }));
+      };
+      img.src = dataUrl;
     };
     reader.readAsDataURL(file);
   };
 
-  const canAdvance = question.inputType === 'photo'
+  const canAdvance = (question.inputType === 'photo' || question.inputType === 'avatarUrl')
     ? true
     : input.trim().length > 0;
 
@@ -149,7 +174,20 @@ export default function OnboardingPage() {
               transition={{ duration: 0.25 }}
               className="flex flex-col gap-3"
             >
-              {question.inputType === 'photo' ? (
+              {question.inputType === 'avatarUrl' ? (
+                <AvatarCreator
+                  onCreated={(url) => {
+                    const updated = { ...profile, avatarUrl: url };
+                    setProfile(updated);
+                    saveProfile(updated);
+                    router.push('/home');
+                  }}
+                  onSkip={() => {
+                    saveProfile(profile);
+                    router.push('/home');
+                  }}
+                />
+              ) : question.inputType === 'photo' ? (
                 <div className="flex flex-col items-center gap-4">
                   {photoPreview ? (
                     <div className="relative">
@@ -208,24 +246,26 @@ export default function OnboardingPage() {
                 />
               )}
 
-              <div className="flex gap-2 justify-end">
-                {question.inputType === 'photo' && (
+              {question.inputType !== 'avatarUrl' && (
+                <div className="flex gap-2 justify-end">
+                  {question.inputType === 'photo' && (
+                    <button
+                      onClick={handleNext}
+                      className="px-4 py-2 text-xs text-white/40 hover:text-white/60 transition-colors"
+                    >
+                      Skip
+                    </button>
+                  )}
                   <button
                     onClick={handleNext}
-                    className="px-4 py-2 text-xs text-white/40 hover:text-white/60 transition-colors"
+                    disabled={!canAdvance}
+                    className="px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                    style={{ background: canAdvance ? '#6366f1' : 'rgba(99,102,241,0.3)', color: '#fff' }}
                   >
-                    Skip
+                    {step === ONBOARDING_QUESTIONS.length - 1 ? 'Meet my future self →' : 'Continue →'}
                   </button>
-                )}
-                <button
-                  onClick={handleNext}
-                  disabled={!canAdvance}
-                  className="px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
-                  style={{ background: canAdvance ? '#6366f1' : 'rgba(99,102,241,0.3)', color: '#fff' }}
-                >
-                  {step === ONBOARDING_QUESTIONS.length - 1 ? 'Meet my future self →' : 'Continue →'}
-                </button>
-              </div>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

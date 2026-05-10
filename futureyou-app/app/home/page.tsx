@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { SCENARIOS, type ScenarioId } from '@/lib/scenarios';
 import { loadProfile, type UserProfile } from '@/lib/onboarding';
+import { loadAvatarBlob } from '@/lib/avatarStorage';
 import ScenarioChip from '@/components/ScenarioChip';
 import NotificationToast from '@/components/NotificationToast';
 
@@ -16,12 +17,18 @@ function HomeContent() {
   const router = useRouter();
   const [activeScenario, setActiveScenario] = useState<ScenarioId>('C');
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>();
   const [showMessage, setShowMessage] = useState(false);
 
   const scenario = SCENARIOS[activeScenario];
 
   useEffect(() => {
-    setProfile(loadProfile());
+    const p = loadProfile();
+    setProfile(p);
+    // Restore blob URL from IndexedDB (profile.avatarUrl is stale after reload)
+    loadAvatarBlob().then((blob) => {
+      if (blob) setAvatarUrl(URL.createObjectURL(blob));
+    });
     const t = setTimeout(() => setShowMessage(true), 2500);
     return () => clearTimeout(t);
   }, []);
@@ -41,6 +48,9 @@ function HomeContent() {
             scenario={scenario}
             onAvatarClick={() => router.push('/chat')}
             interactive
+            photoDataUrl={profile?.photoDataUrl}
+            avatarColors={profile?.avatarColors}
+            avatarUrl={avatarUrl}
           />
         </Suspense>
       </div>

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { SCENARIOS, type ScenarioId } from '@/lib/scenarios';
 import { loadProfile, buildSystemPrompt } from '@/lib/onboarding';
+import { loadAvatarBlob } from '@/lib/avatarStorage';
 import ChatBubble, { TypingIndicator } from '@/components/ChatBubble';
 import ScenarioChip from '@/components/ScenarioChip';
 
@@ -17,11 +18,16 @@ interface Message {
 }
 
 // ElevenLabs TTS — exact same pattern as lg-aura/src/LGComponent.jsx
-async function speakWithElevenLabs(text: string): Promise<void> {
+// Wires the audio through a Web Audio AnalyserNode for live lip sync
+async function speakWithElevenLabs(
+  text: string,
+  audioCtxRef: React.MutableRefObject<AudioContext | null>,
+  analyserRef: React.MutableRefObject<AnalyserNode | null>,
+): Promise<void> {
   const apiKey = process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY;
   if (!apiKey) return;
 
-  const voiceId = 'Xb7hH8MSUJpSbSDYk0k2'; // same voice as lg-aura
+  const voiceId = 'Xb7hH8MSUJpSbSDYk0k2';
 
   const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
     method: 'POST',
@@ -33,10 +39,7 @@ async function speakWithElevenLabs(text: string): Promise<void> {
     body: JSON.stringify({
       text,
       model_id: 'eleven_turbo_v2_5',
-      voice_settings: {
-        stability: 0.3,
-        similarity_boost: 0.3,
-      },
+      voice_settings: { stability: 0.3, similarity_boost: 0.3 },
     }),
   });
 
@@ -46,17 +49,35 @@ async function speakWithElevenLabs(text: string): Promise<void> {
   }
 
   const audioBlob = await response.blob();
-  const audioUrl = URL.createObjectURL(audioBlob);
-  const audio = new Audio(audioUrl);
+  const audioUrl  = URL.createObjectURL(audioBlob);
+  const audio     = new Audio(audioUrl);
+
+  // Wire through Web Audio API for lip sync
+  try {
+    if (!audioCtxRef.current) audioCtxRef.current = new AudioContext();
+    const ctx = audioCtxRef.current;
+    if (ctx.state === 'suspended') await ctx.resume();
+
+    const source   = ctx.createMediaElementSource(audio);
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 256;
+    source.connect(analyser);
+    analyser.connect(ctx.destination);
+    analyserRef.current = analyser;
+  } catch {
+    // AudioContext unavailable — audio still plays, just no lip sync
+  }
 
   return new Promise((resolve, reject) => {
     audio.onended = () => {
+      analyserRef.current = null;
       URL.revokeObjectURL(audioUrl);
       resolve();
     };
-    audio.onerror = (error) => {
+    audio.onerror = (err) => {
+      analyserRef.current = null;
       URL.revokeObjectURL(audioUrl);
-      reject(error);
+      reject(err);
     };
     audio.play();
   });
@@ -73,6 +94,9 @@ function ChatContent() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showAvatar, setShowAvatar] = useState(true);
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>();
+  const audioCtxRef  = useRef<AudioContext | null>(null);
+  const analyserRef  = useRef<AnalyserNode | null>(null);
   const [isListening, setIsListening] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -81,6 +105,12 @@ function ChatContent() {
 
   const scenario = SCENARIOS[activeScenario];
   const profile = loadProfile();
+
+  useEffect(() => {
+    loadAvatarBlob().then((blob) => {
+      if (blob) setAvatarUrl(URL.createObjectURL(blob));
+    });
+  }, []);
 
   useEffect(() => {
     setMessages([{ role: 'assistant', content: scenario.openingMessage }]);
@@ -132,9 +162,8 @@ function ChatContent() {
         });
       }
 
-      // Speak response with ElevenLabs
       setIsSpeaking(true);
-      speakWithElevenLabs(assistantText).finally(() => setIsSpeaking(false));
+      speakWithElevenLabs(assistantText, audioCtxRef, analyserRef).finally(() => setIsSpeaking(false));
     } catch {
       setMessages((prev) => [
         ...prev,
@@ -194,10 +223,17 @@ function ChatContent() {
             className="relative shrink-0 overflow-hidden"
           >
             <Suspense fallback={<div style={{ height: 220, background: scenario.skyBottom }} />}>
-              <AvatarScene scenario={scenario} interactive={false} />
+              <AvatarScene
+                scenario={scenario}
+                interactive={false}
+                analyserRef={analyserRef}
+                avatarColors={profile?.avatarColors}
+                photoDataUrl={profile?.photoDataUrl}
+                avatarUrl={avatarUrl}
+              />
             </Suspense>
 
-            {/* Photo overlay (2D) */}
+            {/* Photo overlay */}
             {profile?.photoDataUrl && (
               <div className="absolute bottom-3 left-3 flex items-center gap-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
